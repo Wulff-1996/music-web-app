@@ -1,4 +1,8 @@
 <?php
+namespace Src\Repositories;
+
+use PDO;
+use Src\Entities\Artist;
 
 const COUNT = 10;
 
@@ -80,6 +84,20 @@ SQL;
 
 
         return $result;
+    }
+
+    function createArtist(Artist $artist){
+        $query = <<<SQL
+            INSERT INTO artist (Name)
+            VALUES (:name);
+SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':name', $artist->name, PDO::PARAM_STR);
+        $stmt->execute();
+
+        // return created artist id
+        return $this->db->conn->lastInsertId();
     }
 
     private function getOffset($page)
