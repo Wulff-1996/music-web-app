@@ -13,9 +13,13 @@ class Database
     private $username = 'root';
     private $password = '';
     private $charset = 'utf8mb4';
-    public $conn;
+    public $conn = null;
 
     public function __construct(){
+        $this->getConnection();
+    }
+
+    public function getConnection(){
         $this->conn = null;
 
         $dsn = "mysql:host=$this->host;dbname=$this->db_name;charset=$this->charset";

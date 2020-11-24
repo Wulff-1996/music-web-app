@@ -3,10 +3,23 @@ namespace Src\Entities;
 
 class Artist {
 
+    public $id;
     public $name;
 
-    function __construct($data)
-    {
-        $this->name = $data['name'];
+    private function __construct(){}
+
+    public static function make($name){
+        $artist = new Artist();
+        $artist->name = $name;
+        return $artist;
     }
+
+    public static function makeWithId($id, $name){
+        $artist = new Artist();
+        $artist->id = $id;
+        $artist->name = $name;
+        return $artist;
+    }
+
+
 }

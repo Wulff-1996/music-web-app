@@ -17,28 +17,28 @@ use Src\util\Validator;
 class ArtistController
 {
     private $db;
-    private $requestMethod;
+    private $method;
     private $artistRepo;
-    private $artistId;
+    private $id;
 
-    public function __construct($requestMethod, $artistId)
+    public function __construct($method, $id)
     {
         $this->db = new Database();
-        $this->requestMethod = $requestMethod;
-        $this->artistId = $artistId;
+        $this->method = $method;
+        $this->id = $id;
         $this->artistRepo = new ArtistRepo($this->db);
     }
 
     public function processRequest()
     {
-        switch ($this->requestMethod) {
+        switch ($this->method) {
             case 'GET':
 
-                if (isset($this->artistId)) {
-                    $response = $this->getArtist($this->artistId);
+                if (isset($this->id)) {
+                    $response = $this->getArtist($this->id);
                 } else {
                     $name = isset($_GET['name']) ? $_GET['name'] : null;
-                    $page = is_numeric($_GET['page']) ? (int) $_GET['page'] : 0;
+                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 0;
 
                     if (isset($name)) {
                         // search artists by name
@@ -55,6 +55,17 @@ class ArtistController
                 $response = $this->createArtist($data);
                 break;
 
+            case 'PUT':
+                $this->validatePathId();
+                $data = json_decode(file_get_contents('php://input'), true);
+                $response = $this->updateArtist($this->id, $data);
+                break;
+
+            case 'DELETE':
+                $this->validatePathId();
+                $response = $this->deleteArtist($this->id);
+                break;
+
             default:
                 $response = Response::notFoundResponse();
                 break;
@@ -66,29 +77,29 @@ class ArtistController
 
     private function getArtist($id)
     {
-        $result = $this->artistRepo->find($id);
-        if (!$result) {
+        $artist = $this->artistRepo->find($id);
+        if (!$artist) {
             return Response::notFoundResponse();
         }
-        return new Response(HttpCode::OK, $result);
+        return Response::success($artist);
     }
 
     private function getArtists($page)
     {
-        $result = $this->artistRepo->findAll($page);
-        return new Response(HttpCode::OK, $result);
+        $artists = $this->artistRepo->findAll($page);
+        return Response::success($artists);
     }
 
     private function getArtistsByName($name, $page)
     {
-        $result = $this->artistRepo->findAllByName($name, $page);
-        return new Response(HttpCode::OK, $result);
+        $artists = $this->artistRepo->findAllByName($name, $page);
+        return Response::success($artists);
     }
 
     private function createArtist($data){
         // validate request
         $rules = [
-            'name' => [Validator::REQUIRED, Validator::TEXT]
+            'name' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 120]
         ];
 
         $validator = new Validator();
@@ -96,19 +107,58 @@ class ArtistController
 
         if ($validator->error()){
             // request is invalid
-            return new Response(
-                HttpCode::BAD_REQUEST,
-                ['message' => $validator->error()]);
+            return Response::badRequest($validator->error());
         }
 
         // request valid
-        $artist = new Artist($validator->data());
+        $artist = Artist::make($data['name']);
 
         // insert new artist
-        $artistId = $this->artistRepo->createArtist($artist);
+        $artist->id = $this->artistRepo->createArtist($artist);
 
-        // get inserted artist
-        $artist = $this->artistRepo->find($artistId);
         return new Response(HttpCode::CREATED, $artist);
+    }
+
+    private function updateArtist($artistId, $data){
+        // validate request
+        $rules = [
+            'name' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 120]
+        ];
+
+        $validator = new Validator();
+        $validator->validate($data, $rules);
+
+        if ($validator->error()){
+            // request is invalid
+            return Response::badRequest($validator->error());
+        }
+
+        $artist = Artist::makeWithId($artistId, $data['name']);
+
+        // update artist
+        if (!$this->artistRepo->updateArtist($artist)){
+            // fails
+            return Response::conflictFkFails();
+        }
+
+        // success return artist
+        return Response::success($artist);
+    }
+
+    private function deleteArtist($id){
+        if ($this->artistRepo->delete($id)){
+            // delete success
+            return Response::okNoContent();
+        } else {
+            // error, integrity violation
+            return Response::conflictFkFails();
+        }
+    }
+
+    private function validatePathId(){
+        if (!$this->id){
+            Response::notFoundResponse()->send();
+            exit();
+        }
     }
 }

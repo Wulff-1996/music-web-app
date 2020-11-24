@@ -1,10 +1,12 @@
 <?php
 namespace Src\Repositories;
 
-use PDO;
-use Src\Entities\Artist;
+require_once 'src/util/RepoUtil.php';
 
-const COUNT = 10;
+use PDO;
+use PDOException;
+use Src\Entities\Artist;
+use Src\util\RepoUtil;
 
 class ArtistRepo
 {
@@ -22,7 +24,6 @@ class ArtistRepo
                 FROM artist a 
                 WHERE a.ArtistId = :id;
 SQL;
-
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -40,11 +41,11 @@ SQL;
             LIMIT :offset, :count;
 SQL;
 
-        $offset = $this->getOffset($page);
+        $offset = RepoUtil::getOffset($page);
 
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':count', COUNT, PDO::PARAM_INT);
+        $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
         $stmt->execute();
         $artists = $stmt->fetchAll();
         $this->db->close();
@@ -52,7 +53,6 @@ SQL;
         $result = array();
         $result['page'] = $page;
         $result['artists'] = $artists;
-
 
         return $result;
     }
@@ -66,13 +66,13 @@ SQL;
             LIMIT :offset, :count;
 SQL;
 
-        $offset = $this->getOffset($page);
+        $offset = RepoUtil::getOffset($page);
         $name = '%' . $name . '%';
 
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':name', $name, PDO::PARAM_STR);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':count', COUNT, PDO::PARAM_INT);
+        $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
 
         $stmt->execute();
         $artists = $stmt->fetchAll();
@@ -95,13 +95,43 @@ SQL;
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':name', $artist->name, PDO::PARAM_STR);
         $stmt->execute();
+        $artistId = $this->db->conn->lastInsertId();
+        $this->db->close();
 
         // return created artist id
-        return $this->db->conn->lastInsertId();
+        return $artistId;
     }
 
-    private function getOffset($page)
-    {
-        return COUNT * $page;
+    function updateArtist(Artist $artist){
+        $query = <<<SQL
+            UPDATE artist 
+            SET Name = :name
+            WHERE ArtistId = :id;
+SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':name', $artist->name, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $artist->id, PDO::PARAM_INT);
+        $stmt->execute();
+        $this->db->close();
+
+        return true;
+    }
+
+    function delete($id){
+        $query = <<<SQL
+            DELETE FROM artist WHERE ArtistId = :id;
+SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        try {
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e){
+            return false;
+        } finally {
+            $this->db->close();
+        }
     }
 }
