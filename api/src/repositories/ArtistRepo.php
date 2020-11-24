@@ -5,12 +5,13 @@ require_once 'src/util/RepoUtil.php';
 
 use PDO;
 use PDOException;
+use Src\Config\Database;
 use Src\Entities\Artist;
 use Src\util\RepoUtil;
 
 class ArtistRepo
 {
-    private $db;
+    private Database $db;
 
     function __construct($db)
     {

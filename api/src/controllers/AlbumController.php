@@ -16,10 +16,10 @@ use Src\Entities\Album;
 
 class AlbumController
 {
-    private $db;
-    private $method;
-    private $albumRepo;
-    private $id;
+    private Database $db;
+    private string $method;
+    private AlbumRepo $albumRepo;
+    private ?string $id;
 
     public function __construct($method, $id)
     {
@@ -84,7 +84,6 @@ class AlbumController
 
     private function getAlbum($id)
     {
-        // validate album id
         $album = $this->albumRepo->find($id);
         // check if album exists
         if (!$album) {

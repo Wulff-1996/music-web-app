@@ -3,12 +3,12 @@ namespace Src\Entities;
 
 class Artist {
 
-    public $id;
-    public $name;
+    public ?string $id;
+    public string $name;
 
     private function __construct(){}
 
-    public static function make($name){
+    public static function make(string $name){
         $artist = new Artist();
         $artist->name = $name;
         return $artist;

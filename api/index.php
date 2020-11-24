@@ -2,6 +2,7 @@
 
 use Src\controllers\AlbumController;
 use Src\Controllers\ArtistController;
+use Src\controllers\TrackController;
 use Src\entities\Request;
 use Src\entities\Response;
 use Src\util\Validator;
@@ -9,9 +10,8 @@ use Src\util\Validator;
 require_once 'src/config/Database.php';
 require_once 'src/controllers/ArtistController.php';
 require_once 'src/controllers/AlbumController.php';
+require_once 'src/controllers/TrackController.php';
 require_once 'src/entities/Request.php';
-
-
 
 header('Content-Type:application/json');
 header('Accept-version:v1');
@@ -42,6 +42,8 @@ switch ($request->controller) {
         break;
 
     case TRACKS_PATH:
+        $controller = new TrackController($request->method, $request->resourceId);
+        $controller->processRequest();
         break;
 
     default:

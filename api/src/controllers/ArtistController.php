@@ -16,10 +16,10 @@ use Src\util\Validator;
 
 class ArtistController
 {
-    private $db;
-    private $method;
-    private $artistRepo;
-    private $id;
+    private Database $db;
+    private string $method;
+    private ArtistRepo $artistRepo;
+    private ?string $id;
 
     public function __construct($method, $id)
     {

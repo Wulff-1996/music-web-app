@@ -5,9 +5,9 @@ namespace Src\entities;
 
 class Album
 {
-    public $id;
-    public $title;
-    public $artistId;
+    public ?string $id;
+    public string $title;
+    public string $artistId;
 
     private function __construct(){}
 

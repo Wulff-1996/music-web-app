@@ -8,12 +8,12 @@ class Database
 {
 
     // specify your own database credentials
-    private $host = 'localhost:3306';
-    private $db_name = 'chinook_abridged';
-    private $username = 'root';
-    private $password = '';
-    private $charset = 'utf8mb4';
-    public $conn = null;
+    private string $host = 'localhost:3306';
+    private string $db_name = 'chinook_abridged';
+    private string $username = 'root';
+    private string $password = '';
+    private string $charset = 'utf8mb4';
+    public ?PDO $conn = null;
 
     public function __construct(){
         $this->getConnection();
@@ -25,7 +25,8 @@ class Database
         $dsn = "mysql:host=$this->host;dbname=$this->db_name;charset=$this->charset";
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false // makes int return as int except double they are string
         ];
 
         try {

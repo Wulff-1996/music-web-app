@@ -7,8 +7,8 @@ use Src\util\HttpCode;
 
 class Response
 {
-    public $statusCode;
-    public $body;
+    public int $statusCode;
+    public $body; // TODO implement type
 
     function __construct($statusCode, $body){
         $this->statusCode = $statusCode;
