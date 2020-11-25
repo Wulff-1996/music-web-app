@@ -1,0 +1,20 @@
+{
+  "name": "jakob/music-web-app",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jakob",
+      "email": "wulff@nyxapp.net"
+    }
+  ],
+  "require": {
+    "ext-json": "*",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wulff\\": "src/"
+    }
+  }
+}
