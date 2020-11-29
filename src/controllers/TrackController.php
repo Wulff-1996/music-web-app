@@ -7,6 +7,7 @@ use Wulff\config\Database;
 use Wulff\entities\Response;
 use Wulff\entities\Track;
 use Wulff\repositories\TrackRepo;
+use Wulff\util\SessionHandler;
 use Wulff\util\Validator;
 
 // TODO only close the DB connection when response is send and not after each DB operation
@@ -30,16 +31,6 @@ class TrackController // TODO create abstract class for similar properties for a
 
     public function processRequest()
     {
-        /* TODO see if user is authenticated and have permission to access these use cases
-                 SessionHandler::startSession();
-                 SessionHandler::setSession(new SessionObject(3454));
-
-                 if (!$session) {
-                     $response = Response::unauthorizedResponse();
-                     $response->send();
-                     return;
-                 }
-        */
         switch ($this->method) {
             case 'GET':
                 if (isset($this->id)) {
@@ -84,6 +75,7 @@ class TrackController // TODO create abstract class for similar properties for a
 
             case 'DELETE':
                 $this->validatePathId();
+                $this->hasAccess(true);
                 $response = $this->deleteTrack($this->id);
                 break;
 
@@ -243,6 +235,24 @@ class TrackController // TODO create abstract class for similar properties for a
     {
         if (!$this->id) {
             Response::notFoundResponse()->send();
+            exit();
+        }
+    }
+
+    private function hasAccess(string $isAdminRequired){
+        // TODO add privileges to all endpoints, maybe some general in the index.php file for checking if logged in
+        SessionHandler::startSession();
+        $session = SessionHandler::getSession();
+
+        if (!$session){
+            // not logged in
+            Response::unauthorizedResponse(['message' => 'Access denied, not logged in'])->send();
+            exit();
+        }
+
+        if ($session->isAdmin() === false && $isAdminRequired){
+            // admin required
+            Response::unauthorizedResponse(['message' => 'Access denied, needs admin privileges'])->send();
             exit();
         }
     }
