@@ -10,7 +10,7 @@ class SessionHandler
     public static function startSession(): void
     {
 
-        session_set_cookie_params(3600 * 3);
+        session_set_cookie_params(3600 * 3); // valid in 3 hours
         session_start();
 
     }

@@ -40,4 +40,33 @@ class Database
     public function close(){
         $this->conn = null;
     }
+
+    public function update(string $tableName, $idName, int $idValue, array $data): bool{
+        $query = "UPDATE $tableName SET ";
+        $params = array();
+        $isFirstIndex = true;
+        foreach ($data as $column => $value){
+            if ($isFirstIndex){
+                $isFirstIndex = false;
+                $query .= "$column = :$column";
+            } else {
+                $query .= ", $column = :$column";
+            }
+
+            // add binding param
+            $params[":$column"] = $value;
+        }
+
+        $query .= " WHERE $idName = :id";
+        $params[':id'] = $idValue;
+
+        $stmt = $this->conn->prepare($query);
+
+        try {
+            $stmt->execute($params);
+            return true;
+        } catch (PDOException $e){
+            return false;
+        }
+    }
 }

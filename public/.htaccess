@@ -1,0 +1,6 @@
+RewriteEngine On
+# RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+# TODO delete this file, only to allow other projects to run on the apache server

@@ -3,11 +3,13 @@
 namespace Wulff\repositories;
 
 use PDO;
+use PDOException;
 use Wulff\config\Database;
+use Wulff\entities\Track;
 use Wulff\interfaces\RepoInterface;
 use Wulff\util\RepoUtil;
 
-class TrackRepo implements RepoInterface
+class TrackRepo
 {
     private Database $db;
 
@@ -40,8 +42,6 @@ SQL;
         $stmt->execute();
         $track = $stmt->fetch();
 
-
-
         return $track;
     }
 
@@ -66,11 +66,11 @@ SQL;
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
         $stmt->execute();
-        $albums = $stmt->fetchAll();
+        $tracks = $stmt->fetchAll();
 
         $result = array();
         $result['page'] = $page;
-        $result['tracks'] = $albums;
+        $result['tracks'] = $tracks;
 
         return $result;
     }
@@ -98,11 +98,11 @@ SQL;
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
         $stmt->execute();
-        $albums = $stmt->fetchAll();
+        $tracks = $stmt->fetchAll();
 
         $result = array();
         $result['page'] = $page;
-        $result['tracks'] = $albums;
+        $result['tracks'] = $tracks;
 
         return $result;
     }
@@ -171,27 +171,63 @@ SQL;
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
         $stmt->execute();
-        $albums = $stmt->fetchAll();
+        $tracks = $stmt->fetchAll();
 
         $result = array();
         $result['page'] = $page;
-        $result['tracks'] = $albums;
+        $result['tracks'] = $tracks;
 
         return $result;
     }
 
-    public function add($data)
+    public function add(Track $track) : ?string
     {
-        // TODO: Implement add() method.
+        $query = <<<SQL
+           INSERT INTO track (Name, AlbumId, MediaTypeId, GenreId, Composer, Milliseconds, Bytes, UnitPrice) 
+           VALUES (:name, :albumId, :mediaTypeId, :genreId, :composer, :milliseconds, :bytes, :unitPrice);
+SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+
+        $stmt->bindValue(':name', $track->getName(), PDO::PARAM_STR);
+        $stmt->bindValue(':mediaTypeId', $track->getMediaTypeId(), PDO::PARAM_INT);
+        $stmt->bindValue(':milliseconds', $track->getMilliseconds(), PDO::PARAM_INT);
+        $stmt->bindValue(':unitPrice', $track->getUnitPrice(), PDO::PARAM_STR); // str used for floats/doubles
+        $stmt->bindValue(':albumId', $track->getAlbumId(), PDO::PARAM_INT);
+        $stmt->bindValue(':composer',$track->getComposer(), PDO::PARAM_STR);
+        $stmt->bindValue(':bytes',$track->getBytes(), PDO::PARAM_INT);
+        $stmt->bindValue(':genreId',   $track->getGenreId(), PDO::PARAM_INT);
+
+        $stmt->execute();
+        $trackId = $this->db->conn->lastInsertId();
+
+        // return created artist id
+        return $trackId;
     }
 
-    public function update($id, $data)
+    public function update($tableName, $idName, $idValue, $data)
     {
-        // TODO: Implement update() method.
+        return $this->db->update(
+            'track',
+            'TrackId',
+            $idValue,
+            $data
+        );
     }
 
     public function delete($id)
     {
-        // TODO: Implement delete() method.
+        $query = <<<SQL
+            DELETE FROM track WHERE TrackId = :id;
+SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        try {
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e){
+            return false;
+        }
     }
 }

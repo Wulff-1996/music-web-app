@@ -12,15 +12,17 @@ require '../vendor/autoload.php';
 const ARTISTS_PATH = 'artists';
 const ALBUMS_PATH = 'albums';
 const TRACKS_PATH = 'tracks';
+const CONTROLLER_INDEX = 3; // when changing url, easier to just change index here
+const RESOURCE_INDEX = 4;
 
-$url = $url = strtok($_SERVER['REQUEST_URI'], "?"); // /web-dev-final-mandatory/music_api/constroller/resource
+$url = $url = strtok($_SERVER['REQUEST_URI'], "?");
 $urlPaths = explode('/', $url);
 $request_method = $_SERVER['REQUEST_METHOD'];
 
 validatePath($urlPaths);
 
-$resourceId = isset($urlPaths[2]) ? $urlPaths[2] : null;
-$request = new Request($urlPaths[1], $resourceId, $request_method);
+$resourceId = isset($urlPaths[RESOURCE_INDEX]) ? $urlPaths[RESOURCE_INDEX] : null;
+$request = new Request($urlPaths[CONTROLLER_INDEX], $resourceId, $request_method);
 
 // map to controller
 switch ($request->controller) {
@@ -48,23 +50,23 @@ switch ($request->controller) {
 
 function validatePath($urlPaths){
     // check if path is correct length
-    if (isset($urlPaths[3])) {
-        // path not known
+    if (isset($urlPaths[RESOURCE_INDEX + 1])) {
+        // path not known, too long
         $response = Response::notFoundResponse();
         $response->send();
         exit();
     }
 
     // check if controller is present
-    if (!isset($urlPaths[1])){
+    if (!isset($urlPaths[CONTROLLER_INDEX])){
         $response = Response::notFoundResponse();
         $response->send();
         exit();
     }
 
     // validate resource id if present
-    if (isset($urlPaths[2])){
-        $id = $urlPaths[2];
+    if (isset($urlPaths[RESOURCE_INDEX])){
+        $id = $urlPaths[RESOURCE_INDEX];
         // validate album id
         $data = ['id' => $id];
         $rules = ['id' => [Validator::REQUIRED, Validator::NUMERIC, Validator::MIN_VALUE => 0]];
@@ -73,7 +75,8 @@ function validatePath($urlPaths){
 
         // check if path id is valid
         if ($validator->error()) {
-            $response = Response::notFoundResponse();
+            $response = Response::badRequest($validator->error());
+           // $response = Response::notFoundResponse();
             $response->send();
             exit();
         }

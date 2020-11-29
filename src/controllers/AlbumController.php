@@ -163,7 +163,6 @@ class AlbumController
         $album = Album::makeWithId($id, $data['title'], $data['artist_id']);
 
         $isSuccess = $this->albumRepo->update($album);
-        $this->albumRepo->closeConnection();
 
         // check if was success
         if (!$isSuccess){
@@ -191,6 +190,4 @@ class AlbumController
             exit();
         }
     }
-
-
 }

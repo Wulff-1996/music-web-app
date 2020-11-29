@@ -8,6 +8,8 @@ class Validator
     const MIN_LENGTH = 'minLength';
     const MAX_LENGTH = 'maxLength';
     const NUMERIC = 'numeric';
+    const INTEGER = 'integer';
+    const FLOAT = 'float';
     const MIN_VALUE = 'minValue';
     const MAX_VALUE = 'maxValue';
     const ALPHA = 'alpha';
@@ -36,11 +38,15 @@ class Validator
         // update data
         $this->_data = $data;
 
-        // check if any missing fields in data
+        // check if any REQUIRED fields are not present in data
         foreach ($rules as $key => $value) {
-            if (!array_key_exists($key, $data)) {
-                // data field missing
-                $this->addError($key, strtolower($key) . ' required');
+            // check if field is required
+            if (in_array(self::REQUIRED, $value, true)){
+                // field required, check if field is in data
+                if (!array_key_exists($key, $data)) {
+                    // data field missing
+                    $this->addError($key, strtolower($key) . ' required');
+                }
             }
         }
 
@@ -53,15 +59,21 @@ class Validator
                         $rule = $rule_value;
 
                     switch ($rule) {
-                        case self::REQUIRED:
-                            if (empty($item_value) && $rule_value) {
-                                $this->addError($item, strtolower($item) . ' required');
+                        case self::NUMERIC:
+                            if (!is_numeric($item_value) && $rule_value) {
+                                $this->addError($item, strtolower($item) . ' should be numeric');
                             }
                             break;
 
-                        case self::NUMERIC:
-                            if (!ctype_digit($item_value) && $rule_value) {
-                                $this->addError($item, strtolower($item) . ' should be numeric');
+                        case self::INTEGER:
+                            if (!is_int($item_value) && $rule_value){
+                                $this->addError($item, strtolower($item) . ' should be integer');
+                            }
+                            break;
+
+                        case self::FLOAT:
+                            if (!is_float($item_value) && $rule_value){
+                                $this->addError($item, strtolower($item) . ' should be float');
                             }
                             break;
 
