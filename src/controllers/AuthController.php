@@ -122,6 +122,11 @@ class AuthController
 
         $data = $this->authRepo->getCustomerLogin($email);
 
+        if (!$data){
+            // password does not match
+            return Response::unauthorizedResponse(['message' => 'email and/or password invalid']);
+        }
+
         if (!(password_verify($password, $data['Password']))) {
             // password does not match
             return Response::unauthorizedResponse(['message' => 'email and/or password invalid']);

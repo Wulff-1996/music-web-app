@@ -17,7 +17,7 @@ class AuthRepo
     }
 
 
-    public function getAdminPassword(): ?array
+    public function getAdminPassword()
     {
         $query = <<<'SQL'
                 SELECT Password FROM admin;
@@ -28,7 +28,7 @@ class AuthRepo
         return $stmt->fetch();
     }
 
-    public function getCustomerLogin(string $email): ?array
+    public function getCustomerLogin(string $email)
     {
         $query = <<<'SQL'
                 SELECT CustomerId, Password FROM customer WHERE Email = ?;
