@@ -18,10 +18,14 @@ class SessionHandler
         $_SESSION['session_object'] = $sessionObject;
     }
 
+    public static function hasSession(): bool {
+        return isset($_SESSION['session_object']);
+    }
+
     public static function getSession(): ?SessionObject
     {
 
-        if (!isset($_SESSION['session_object'])) {
+        if (!static::hasSession()) {
             return null;
         }
 

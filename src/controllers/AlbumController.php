@@ -5,6 +5,7 @@ namespace Wulff\controllers;
 
 use Wulff\config\Database;
 use Wulff\entities\Album;
+use Wulff\entities\Auth;
 use Wulff\entities\Response;
 use Wulff\repositories\AlbumRepo;
 use Wulff\util\SessionObject;
@@ -17,9 +18,9 @@ class AlbumController
     private AlbumRepo $albumRepo;
     private ?string $id;
 
-    public function __construct($method, $id)
+    public function __construct($method, $id, $db = null)
     {
-        $this->db = new Database();
+        $this->db = $db ?? new Database();
         $this->method = $method;
         $this->id = $id;
         $this->albumRepo = new AlbumRepo($this->db);
@@ -29,6 +30,11 @@ class AlbumController
     {
         switch ($this->method) {
             case 'GET':
+
+                $user = Auth::current();
+
+                exit(print_r($user));
+
                 if (isset($this->id)) {
                     // get one album
                     $response = $this->getAlbum($this->id);

@@ -4,6 +4,7 @@ use Wulff\controllers\AlbumController;
 use Wulff\controllers\ArtistController;
 use Wulff\controllers\AuthController;
 use Wulff\controllers\TrackController;
+use Wulff\entities\Auth;
 use Wulff\entities\Request;
 use Wulff\entities\Response;
 use Wulff\util\Validator;
@@ -22,10 +23,11 @@ const LOGOUT_PATH = 'logout';
 const CONTROLLER_INDEX = 3; // when changing url, easier to just change index here
 const RESOURCE_INDEX = 4;
 
+\Wulff\util\SessionHandler::startSession();
+
 $url = $url = strtok($_SERVER['REQUEST_URI'], "?");
 $urlPaths = explode('/', $url);
 $request_method = $_SERVER['REQUEST_METHOD'];
-
 validatePath($urlPaths);
 
 $resourceId = isset($urlPaths[RESOURCE_INDEX]) ? $urlPaths[RESOURCE_INDEX] : null;

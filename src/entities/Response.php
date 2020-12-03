@@ -3,6 +3,7 @@
 namespace Wulff\entities;
 
 use Wulff\util\HttpCode;
+use Wulff\util\SessionHandler;
 
 class Response
 {
@@ -19,6 +20,11 @@ class Response
     {
         header('Content-Type: application/json');
         header('Accept-version: v1');
+
+        if (SessionHandler::hasSession()) {
+            header('Set-cookie: PHPSESSID=' . session_id());
+        }
+
         http_response_code($this->statusCode);
         if ($this->body != null) {
             echo json_encode($this->body);
