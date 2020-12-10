@@ -6,8 +6,10 @@ namespace Wulff\controllers;
 
 use mysql_xdevapi\Session;
 use Wulff\config\Database;
+use Wulff\entities\Customer;
 use Wulff\entities\Response;
 use Wulff\repositories\AuthRepo;
+use Wulff\util\HttpCode;
 use Wulff\util\SessionHandler;
 use Wulff\util\SessionObject;
 use Wulff\util\Validator;
@@ -45,8 +47,13 @@ class AuthController
                         $response = $this->validateCustomerLogin($data);
                         break;
 
+                    case CUSTOMER_SIGN_UP_PATH:
+                        $data = json_decode(file_get_contents('php://input'), true);
+                        $response = $this->signup($data);
+                        break;
+
                     case LOGOUT_PATH:
-                        //$data = json_decode(file_get_contents('php://input'), true);
+                        $data = json_decode(file_get_contents('php://input'), true);
                         $response = $this->logout();
                         break;
                 }
@@ -122,7 +129,7 @@ class AuthController
 
         $data = $this->authRepo->getCustomerLogin($email);
 
-        if (!$data){
+        if (!$data) {
             // password does not match
             return Response::unauthorizedResponse(['message' => 'email and/or password invalid']);
         }
@@ -138,6 +145,63 @@ class AuthController
 
             return Response::okNoContent();
         }
+    }
+
+    private function signup($data)
+    {
+        // validate request
+        $rules = [
+            'first_name' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 40],
+            'last_name' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 20],
+            'email' => [Validator::REQUIRED, Validator::EMAIL, Validator::MAX_LENGTH => 60],
+            'password' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 255],
+            'phone' => [Validator::TEXT, Validator::MAX_LENGTH => 24],
+            'fax' => [Validator::TEXT, Validator::MAX_LENGTH => 24],
+            'company' => [Validator::TEXT, Validator::MAX_LENGTH => 80],
+            'address' => [Validator::TEXT, Validator::MAX_LENGTH => 70],
+            'city' => [Validator::TEXT, Validator::MAX_LENGTH => 40],
+            'state' => [Validator::TEXT, Validator::MAX_LENGTH => 40],
+            'postal_code' => [Validator::TEXT, Validator::MAX_LENGTH => 10],
+            'country' => [Validator::TEXT, Validator::MAX_LENGTH => 40]
+        ];
+
+        $validator = new Validator();
+        $validator->validate($data, $rules);
+
+        if ($validator->error()) {
+            // request is invalid
+            return Response::badRequest($validator->error());
+        }
+
+        $customer = new Customer(
+            null,
+            $data['first_name'],
+            $data['last_name'],
+            $data['email'],
+            $data['password'],
+            $data['phone'],
+            $data['fax'],
+            $data['company'],
+            $data['address'],
+            $data['city'],
+            $data['state'],
+            $data['postal_code'],
+            $data['country']
+        );
+
+        try {
+            // add track
+            $customerId = $this->authRepo->createCustomer($customer);
+
+        } catch (PDOException $e) {
+            // integrity error
+            return Response::conflictFkFails();
+        }
+
+        // get inserted track
+        $customer->setId($customerId);
+
+        return Response::success((array) $customer);
     }
 
     private function logout(): Response

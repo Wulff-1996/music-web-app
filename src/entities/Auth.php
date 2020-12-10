@@ -23,4 +23,17 @@ class Auth
         return $customerRepo->find($userId);
     }
 
+    private static function test()
+    {
+        // TODO implement autehntication for endpoints
+        // how to use
+        $user = self::current();
+
+        if ($user){
+            // user logged in and authenticated
+        } else {
+            // user not logged in
+        }
+    }
+
 }

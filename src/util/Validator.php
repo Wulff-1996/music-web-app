@@ -14,6 +14,7 @@ class Validator
     const MAX_VALUE = 'maxValue';
     const ALPHA = 'alpha';
     const TEXT = 'text';
+    const EMAIL = 'email';
 
     private $_errors = [];
     private $_data = [];
@@ -86,6 +87,12 @@ class Validator
                         case self::ALPHA:
                             if (!ctype_alpha($item_value) && $rule_value) {
                                 $this->addError($item, strtolower($item) . ' should be alphabetic characters');
+                            }
+                            break;
+
+                        case self::EMAIL:
+                            if (!filter_var($item_value, FILTER_VALIDATE_EMAIL) && $rule_value) {
+                                $this->addError($item, strtolower($item) . ' should be a valid email');
                             }
                             break;
 

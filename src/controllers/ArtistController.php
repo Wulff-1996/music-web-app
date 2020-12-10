@@ -111,7 +111,7 @@ class ArtistController
         // insert new artist
         $artist->id = $this->artistRepo->createArtist($artist);
 
-        return new Response(HttpCode::CREATED, $artist);
+        return Response::success((array) $artist);
     }
 
     private function updateArtist($artistId, $data){
@@ -137,7 +137,7 @@ class ArtistController
         }
 
         // success return artist
-        return Response::success($artist);
+        return Response::success((array) $artist);
     }
 
     private function deleteArtist($id){

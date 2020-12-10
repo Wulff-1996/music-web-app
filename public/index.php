@@ -15,15 +15,16 @@ const ARTISTS_PATH = 'artists';
 const ALBUMS_PATH = 'albums';
 const TRACKS_PATH = 'tracks';
 const AUTH_PATH = 'auth';
+
+
 const ADMIN_LOGIN_PATH = 'admin-login';
 const CUSTOMER_LOGIN_PATH = 'customer-login';
+const CUSTOMER_SIGN_UP_PATH = 'customer-signup';
 const LOGOUT_PATH = 'logout';
 
 
 const CONTROLLER_INDEX = 3; // when changing url, easier to just change index here
 const RESOURCE_INDEX = 4;
-
-\Wulff\util\SessionHandler::startSession();
 
 $url = $url = strtok($_SERVER['REQUEST_URI'], "?");
 $urlPaths = explode('/', $url);
@@ -52,6 +53,7 @@ switch ($request->controller) {
 
     case ADMIN_LOGIN_PATH:
     case CUSTOMER_LOGIN_PATH:
+    case CUSTOMER_SIGN_UP_PATH:
     case LOGOUT_PATH:
         $useCase = $request->controller;
         $controller = new AuthController($useCase, $request->method, $request->resourceId);

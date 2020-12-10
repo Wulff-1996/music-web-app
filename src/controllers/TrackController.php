@@ -43,18 +43,15 @@ class TrackController // TODO create abstract class for similar properties for a
                     $albumId = isset($_GET['album_id']) && is_numeric($_GET['album_id']) ? (int)$_GET['album_id'] : null;
                     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
 
-                    if (isset($artistId)) {
+                    if (isset($search)) {
+                        // search by albums by search eg track name, artis name, album name
+                        $response = $this->getTracksBySearch($search, $page);
+                    } else if (isset($artistId)) {
                         // get all tracks for artist
                         $response = $this->getTracksForArtist($artistId, $page);
-
                     } else if (isset($albumId)) {
                         // get tracks for album
                         $response = $this->getTracksForAlbum($albumId, $page);
-
-                    } else if (isset($search)) {
-                        // search by albums by search eg track name, artis name, album name
-                        $response = $this->getTracksBySearch($search, $page);
-
                     } else {
                         // get all tracks
                         $response = $this->getTracks($page);
@@ -239,18 +236,19 @@ class TrackController // TODO create abstract class for similar properties for a
         }
     }
 
-    private function hasAccess(string $isAdminRequired){
+    private function hasAccess(string $isAdminRequired)
+    {
         // TODO add privileges to all endpoints, maybe some general in the index.php file for checking if logged in
         SessionHandler::startSession();
         $session = SessionHandler::getSession();
 
-        if (!$session){
+        if (!$session) {
             // not logged in
             Response::unauthorizedResponse(['message' => 'Access denied, not logged in'])->send();
             exit();
         }
 
-        if ($session->isAdmin() === false && $isAdminRequired){
+        if ($session->isAdmin() === false && $isAdminRequired) {
             // admin required
             Response::unauthorizedResponse(['message' => 'Access denied, needs admin privileges'])->send();
             exit();

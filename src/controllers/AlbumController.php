@@ -2,7 +2,6 @@
 
 namespace Wulff\controllers;
 
-
 use Wulff\config\Database;
 use Wulff\entities\Album;
 use Wulff\entities\Auth;
@@ -31,10 +30,6 @@ class AlbumController
         switch ($this->method) {
             case 'GET':
 
-                $user = Auth::current();
-
-                exit(print_r($user));
-
                 if (isset($this->id)) {
                     // get one album
                     $response = $this->getAlbum($this->id);
@@ -42,16 +37,16 @@ class AlbumController
                 } else {
                     // get all albums
 
-                    $artistId = isset($_GET['artist_id']) && is_numeric($_GET['artist_id']) ? (int)$_GET['artist_id'] : null;
                     $title = isset($_GET['title']) ? $_GET['title'] : null;
+                    $artistId = isset($_GET['artist_id']) && is_numeric($_GET['artist_id']) ? (int)$_GET['artist_id'] : null;
                     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
 
-                    if (isset($artistId)) {
-                        // get all albums for artist
-                        $response = $this->getAlbumsForArtist($artistId, $page);
-                    } else if (isset($title)) {
+                    if (isset($title)) {
                         // get all albums match title
                         $response = $this->getAlbumsByTitle($title, $page);
+                    } else if (isset($artistId)) {
+                        // get all albums for artist
+                        $response = $this->getAlbumsForArtist($artistId, $page);
                     } else {
                         // get all albums
                         $response = $this->getAlbums($page);
@@ -150,7 +145,8 @@ class AlbumController
         return Response::created($album);
     }
 
-    private function updateAlbum($id, $data){
+    private function updateAlbum($id, $data)
+    {
         // validate request
         $rules = [
             'title' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 160],
@@ -160,7 +156,7 @@ class AlbumController
         $validator = new Validator();
         $validator->validate($data, $rules);
 
-        if ($validator->error()){
+        if ($validator->error()) {
             // request is invalid
             return Response::badRequest($validator->error());
         }
@@ -171,17 +167,18 @@ class AlbumController
         $isSuccess = $this->albumRepo->update($album);
 
         // check if was success
-        if (!$isSuccess){
+        if (!$isSuccess) {
             // fails
             return Response::conflictFkFails();
         }
 
         // success return album
-        return Response::success($album);
+        return Response::success((array)$album);
     }
 
-    private function deleteAlbum($id){
-        if ($this->albumRepo->delete($id)){
+    private function deleteAlbum($id)
+    {
+        if ($this->albumRepo->delete($id)) {
             // delete success
             return Response::okNoContent();
         } else {
@@ -190,8 +187,9 @@ class AlbumController
         }
     }
 
-    private function validatePathId(){
-        if (!$this->id){
+    private function validatePathId()
+    {
+        if (!$this->id) {
             Response::notFoundResponse()->send();
             exit();
         }
