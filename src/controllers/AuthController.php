@@ -142,7 +142,7 @@ class AuthController
             // begin session
             SessionHandler::startSession();
             SessionHandler::setSession(new SessionObject($data['CustomerId'], false));
-
+            // TODO return logged in customer
             return Response::okNoContent();
         }
     }
@@ -173,12 +173,15 @@ class AuthController
             return Response::badRequest($validator->error());
         }
 
+        // hash password
+        $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+
         $customer = new Customer(
             null,
             $data['first_name'],
             $data['last_name'],
             $data['email'],
-            $data['password'],
+            $hashedPassword,
             $data['phone'],
             $data['fax'],
             $data['company'],

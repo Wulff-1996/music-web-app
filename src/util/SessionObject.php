@@ -17,7 +17,7 @@ class SessionObject implements JsonSerializable, Serializable
         $this->isAdmin = $isAdmin;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

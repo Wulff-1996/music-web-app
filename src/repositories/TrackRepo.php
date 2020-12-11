@@ -205,12 +205,12 @@ SQL;
         return $trackId;
     }
 
-    public function update($tableName, $idName, $idValue, $data)
+    public function update(int $id, array $data)
     {
         return $this->db->update(
             'track',
             'TrackId',
-            $idValue,
+            $id,
             $data
         );
     }

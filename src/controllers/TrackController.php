@@ -199,10 +199,9 @@ class TrackController // TODO create abstract class for similar properties for a
             return Response::badRequest($validator->error());
         }
 
-        // request valid update track
+        // request valid
+        // update track
         $isSuccess = $this->trackRepo->update(
-            'track',
-            'TrackId',
             $trackId,
             Track::toDbEntity($validator->data())
         );

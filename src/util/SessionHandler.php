@@ -4,6 +4,9 @@
 namespace Wulff\util;
 
 
+use Wulff\config\Database;
+use Wulff\repositories\CustomerRepo;
+
 class SessionHandler
 {
 
@@ -18,7 +21,8 @@ class SessionHandler
         $_SESSION['session_object'] = $sessionObject;
     }
 
-    public static function hasSession(): bool {
+    public static function hasSession(): bool
+    {
         return isset($_SESSION['session_object']);
     }
 
@@ -35,8 +39,28 @@ class SessionHandler
         return $sessionObject;
     }
 
-    public static function clear(){
+    public static function clear()
+    {
         unset($_SESSION['session_object']);
     }
 
+    public static function currentUserId(): ?int
+    {
+        SessionHandler::startSession();
+        if (!SessionHandler::hasSession()) {
+            return null;
+        }
+
+        $session = SessionHandler::getSession();
+        return $session->getId();
+    }
+
+    public static function current(): ?array
+    {
+        $userId = self::currentUserId();
+
+        $db = new Database();
+        $customerRepo = new CustomerRepo($db);
+        return $customerRepo->find($userId);
+    }
 }

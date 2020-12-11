@@ -14,7 +14,8 @@ class CustomerRepo
         $this->db = $db;
     }
 
-    public function closeConnection(){
+    public function closeConnection()
+    {
         $this->db->close();
     }
 
@@ -22,7 +23,7 @@ class CustomerRepo
     {
         $query = <<<'SQL'
                 SELECT *
-                FROM customer c
+                FROM customer
                 WHERE CustomerId = :id;
 SQL;
 
@@ -32,5 +33,15 @@ SQL;
         $customer = $stmt->fetch();
 
         return $customer;
+    }
+
+    public function updateCustomer(int $id, array $customer): bool
+    {
+        return $this->db->update(
+            'customer',
+            'CustomerId',
+            $id,
+            (array) $customer
+        );
     }
 }
