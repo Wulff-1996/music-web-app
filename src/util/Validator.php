@@ -2,6 +2,8 @@
 
 namespace Wulff\util;
 
+use http\Env\Response;
+
 class Validator
 {
     const REQUIRED = 'required';
@@ -15,6 +17,7 @@ class Validator
     const ALPHA = 'alpha';
     const TEXT = 'text';
     const EMAIL = 'email';
+    const ARRAY = 'array';
 
     private $_errors = [];
     private $_data = [];
@@ -110,13 +113,19 @@ class Validator
 
                         case self::MIN_VALUE:
                             if ($item_value < $rule_value) {
-                                $this->addError($item, strtolower($item) . 'should be minimum ' . $rule_value);
+                                $this->addError($item, strtolower($item) . ' should be minimum ' . $rule_value);
                             }
                             break;
 
                         case self::MAX_VALUE:
                             if ($item_value > $rule_value) {
-                                $this->addError($item, strtolower($item) . 'should be maximum ' . $rule_value);
+                                $this->addError($item, strtolower($item) . ' should be maximum ' . $rule_value);
+                            }
+                            break;
+
+                        case self::ARRAY:
+                            if (!is_array($item_value) && $rule_value){
+                                $this->addError($item, strtolower($item) . ' should be array');
                             }
                             break;
                     }
@@ -127,7 +136,7 @@ class Validator
 
     private function addError($item, $error)
     {
-        $this->_errors[$item][] = $error;
+        $this->_errors[] = $error;
     }
 
     // returns an nested array of fields with array of errors

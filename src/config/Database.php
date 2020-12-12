@@ -69,4 +69,41 @@ class Database
             return false;
         }
     }
+
+    public function insert(string $tableName, array $data){
+        <<<SQL
+        INSERT INTO track (name, age, color)
+        VALUES (?, ?, ?)
+SQL;
+
+        $query = "INSERT INTO $tableName ";
+        $insetColumns = '';
+        $valuesPlaceholders = '';
+        $values = array();
+
+        $isFirst = true;
+        foreach($data as $key => $value){
+            if ($isFirst){
+                $isFirst = false;
+
+                $insetColumns .= "($key";
+                $valuesPlaceholders .= '(?';
+
+            } else {
+                $insetColumns .= ", $key";
+                $valuesPlaceholders .= ', ?';
+            }
+
+            $values[] = $value;
+        }
+
+        $insetColumns .= ')';
+        $valuesPlaceholders .= ');';
+
+        $query .= $insetColumns . ' VALUES ' . $valuesPlaceholders;
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($values);
+        return $this->conn->lastInsertId();
+    }
 }

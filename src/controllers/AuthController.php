@@ -173,6 +173,13 @@ class AuthController
             return Response::badRequest($validator->error());
         }
 
+        // check if email is unique
+        if (!$this->authRepo->isEmailUnique($data['email'])){
+            // email exists
+            return Response::badRequest(['message' => 'email is not unique']);
+        }
+
+        // email is unique proceed
         // hash password
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
 
@@ -214,10 +221,8 @@ class AuthController
 
         if ($session) {
             SessionHandler::clear();
-            return Response::okNoContent();
-        } else {
-            return Response::unauthorizedResponse(['message' => 'No active session or not authorized']);
         }
+        return Response::okNoContent();
     }
 
 }

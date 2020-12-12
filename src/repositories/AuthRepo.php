@@ -41,13 +41,30 @@ class AuthRepo
         return $stmt->fetch();
     }
 
-    public function createCustomer(Customer $customer) : ?int {
+    public function isEmailUnique(string $email): bool
+    {
+        $query = <<<'SQL'
+                SELECT Email from customer where Email = :email;
+            SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->execute();
+
+        if ($stmt->fetch()){
+            // email exists
+            return false;
+        } else return true;
+    }
+
+    public function createCustomer(Customer $customer): ?int
+    {
         $query = <<<'SQL'
                 INSERT INTO customer (FirstName, LastName, Password, Company, Address, City, State, Country, PostalCode, Phone, Fax, Email) 
                 VALUES (:firstName, :lastName, :password, :company, :address, :city, :state, :country, :postalCode, :phone, :fax, :email);
 SQL;
 
-        $stmt = $this->db->conn->prepare($query) ;
+        $stmt = $this->db->conn->prepare($query);
 
         $stmt->bindValue(':firstName', $customer->getFirstName(), PDO::PARAM_STR);
         $stmt->bindValue(':lastName', $customer->getLastName(), PDO::PARAM_STR);
