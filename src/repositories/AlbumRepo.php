@@ -24,7 +24,7 @@ class AlbumRepo
     public function find($id)
     {
         $query = <<<'SQL'
-                SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId 
+                SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId
                 FROM album al
                 LEFT JOIN artist ar on al.ArtistId = ar.ArtistId
                 WHERE AlbumId = :id;
@@ -36,6 +36,26 @@ SQL;
         $album = $stmt->fetch();
 
         return $album;
+    }
+
+    public function getTracksByAlbumId(int $id){
+        $query = <<<'SQL'
+              SELECT t.TrackId, t.Name AS TrackName, g.GenreId, g.Name AS GenreName, 
+                     m.MediaTypeId ,m.Name AS MediaName, 
+                     t.Composer, t.Milliseconds, t.Bytes, t.UnitPrice
+            FROM track t
+            LEFT JOIN album al ON t.AlbumId = al.AlbumId
+            LEFT JOIN mediatype m ON m.MediaTypeId = t.MediaTypeId
+            LEFT JOIN genre g ON g.GenreId = t.GenreId
+            WHERE al.AlbumId = :id;
+SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $track = $stmt->fetchAll();
+
+        return $track;
     }
 
     public function findAll($page)

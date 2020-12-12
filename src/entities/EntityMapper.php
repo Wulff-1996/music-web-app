@@ -70,4 +70,38 @@ class EntityMapper
         return $result;
     }
 
+    public static function toJsonAlbumDetails(array $album, array $tracks): array
+    {
+        $result = array();
+        $result['id'] = $album['AlbumId'];
+        $result['title'] = $album['Title'];
+        $result['artist'] = [
+            'id' => $album['ArtistId'],
+            'name' => $album['Name']
+        ];
+        $result['track_total'] = sizeof($tracks);
+        $result['tracks'] = array();
+
+        foreach ($tracks as $track) {
+            array_push($result['tracks'], [
+                'id' => $track['TrackId'],
+                'title' => $track['TrackName'],
+                'composer' => $track['Composer'],
+                'milliseconds' => $track['Milliseconds'],
+                'bytes' => $track['Bytes'],
+                'unit_price' => $track['UnitPrice'],
+                'genre' => [
+                    'id' => $track['GenreId'],
+                    'name' => $track['GenreName']
+                ],
+                'media' => [
+                    'id' => $track['MediaTypeId'],
+                    'name' => $track['MediaName']
+                ]
+            ]);
+        }
+
+        return $result;
+    }
+
 }

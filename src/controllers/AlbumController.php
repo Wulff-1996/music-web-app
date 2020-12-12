@@ -5,6 +5,7 @@ namespace Wulff\controllers;
 use Wulff\config\Database;
 use Wulff\entities\Album;
 use Wulff\entities\Auth;
+use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\AlbumRepo;
 use Wulff\util\SessionObject;
@@ -36,15 +37,15 @@ class AlbumController
 
                 } else {
                     // get all albums
-
                     $title = isset($_GET['title']) ? $_GET['title'] : null;
-                    $artistId = isset($_GET['artist_id']) && is_numeric($_GET['artist_id']) ? (int)$_GET['artist_id'] : null;
-                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
+                    $artistId = filter_input(INPUT_GET, 'artist_id', FILTER_VALIDATE_INT);
+                    $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+                    if (!$page) $page = 0;
 
-                    if (isset($title)) {
+                    if ($title) {
                         // get all albums match title
                         $response = $this->getAlbumsByTitle($title, $page);
-                    } else if (isset($artistId)) {
+                    } else if ($artistId) {
                         // get all albums for artist
                         $response = $this->getAlbumsForArtist($artistId, $page);
                     } else {
@@ -79,7 +80,7 @@ class AlbumController
         $response->send();
 
         // close connection
-        $this->trackRepo->closeConnection();
+        $this->albumRepo->closeConnection();
     }
 
     private function getAlbum($id)
@@ -90,30 +91,31 @@ class AlbumController
             // not found
             return Response::notFoundResponse();
         }
-        $this->albumRepo->closeConnection();
 
         // album exists
-        return Response::success($album);
+        // get tracks
+        $tracks = $this->albumRepo->getTracksByAlbumId($id);
+
+        $result = EntityMapper::toJsonAlbumDetails($album, $tracks);
+
+        return Response::success($result);
     }
 
     private function getAlbums($page)
     {
         $albums = $this->albumRepo->findAll($page);
-        $this->albumRepo->closeConnection();
         return Response::success($albums);
     }
 
     private function getAlbumsForArtist($artistId, $page)
     {
         $albums = $this->albumRepo->findAllByArtistId($artistId, $page);
-        $this->albumRepo->closeConnection();
         return Response::success($albums);
     }
 
     private function getAlbumsByTitle($title, $page)
     {
         $albums = $this->albumRepo->findAllByTitle($title, $page);
-        $this->albumRepo->closeConnection();
         return Response::success($albums);
     }
 
@@ -141,9 +143,6 @@ class AlbumController
 
         // get inserted album
         $album = $this->albumRepo->find($albumId);
-
-        // close connection
-        $this->albumRepo->closeConnection();
 
         return Response::created($album);
     }

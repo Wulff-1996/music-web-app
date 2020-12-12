@@ -32,10 +32,11 @@ class ArtistController
                 if (isset($this->id)) {
                     $response = $this->getArtist($this->id);
                 } else {
-                    $name = isset($_GET['name']) ? $_GET['name'] : null;
-                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
+                    $name = isset($_GET['name']) ? (string)$_GET['name'] : null;
+                    $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+                    if (!$page) $page = 0;
 
-                    if (isset($name)) {
+                    if ($name) {
                         // search artists by name
                         $response = $this->getArtistsByName($name, $page);
                     } else {
@@ -70,7 +71,7 @@ class ArtistController
         $response->send();
 
         // close connection
-        $this->trackRepo->closeConnection();
+        $this->artistRepo->closeConnection();
     }
 
     private function getArtist($id)
