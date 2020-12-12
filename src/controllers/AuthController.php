@@ -66,6 +66,9 @@ class AuthController
 
         // send response
         $response->send();
+
+        // close connection
+        $this->trackRepo->closeConnection();
     }
 
     private function validateAdminLogin($data): Response

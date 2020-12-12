@@ -39,6 +39,7 @@ class TrackController // TODO create abstract class for similar properties for a
                 } else {
                     // get all
                     $search = isset($_GET['search']) ? $_GET['search'] : null;
+                    $customerId = filter_input(INPUT_GET, 'customer_id', FILTER_VALIDATE_INT);
                     $artistId = isset($_GET['artist_id']) && is_numeric($_GET['artist_id']) ? (int)$_GET['artist_id'] : null;
                     $albumId = isset($_GET['album_id']) && is_numeric($_GET['album_id']) ? (int)$_GET['album_id'] : null;
                     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
@@ -46,6 +47,9 @@ class TrackController // TODO create abstract class for similar properties for a
                     if (isset($search)) {
                         // search by albums by search eg track name, artis name, album name
                         $response = $this->getTracksBySearch($search, $page);
+                    } else if ($customerId) {
+                        // search customer tracks
+                        $response = $this->getTracksByCustomerId($customerId, $page);
                     } else if (isset($artistId)) {
                         // get all tracks for artist
                         $response = $this->getTracksForArtist($artistId, $page);
@@ -83,6 +87,9 @@ class TrackController // TODO create abstract class for similar properties for a
 
         // send response
         $response->send();
+
+        // close connection
+        $this->trackRepo->closeConnection();
     }
 
     private function getTrack($id): Response
@@ -93,7 +100,6 @@ class TrackController // TODO create abstract class for similar properties for a
             // not found
             return Response::notFoundResponse();
         }
-        $this->trackRepo->closeConnection();
 
         // album exists
         return Response::success($track);
@@ -102,28 +108,30 @@ class TrackController // TODO create abstract class for similar properties for a
     private function getTracks($page): Response
     {
         $tracks = $this->trackRepo->FindAll($page);
-        $this->trackRepo->closeConnection();
         return Response::success($tracks);
     }
 
     private function getTracksForArtist($artistId, $page): Response
     {
         $tracks = $this->trackRepo->findAllByArtist($artistId, $page);
-        $this->trackRepo->closeConnection();
         return Response::success($tracks);
     }
 
     private function getTracksForAlbum($albumId, $page): Response
     {
         $tracks = $this->trackRepo->findAllByAlbum($albumId, $page);
-        $this->trackRepo->closeConnection();
         return Response::success($tracks);
     }
 
     private function getTracksBySearch($search, int $page): Response
     {
         $tracks = $this->trackRepo->findAllBySearch($search, $page);
-        $this->trackRepo->closeConnection();
+        return Response::success($tracks);
+    }
+
+    private function getTracksByCustomerId(int $customerId, int $page)
+    {
+        $tracks = $this->trackRepo->findAllByCustomerId($customerId, $page);
         return Response::success($tracks);
     }
 

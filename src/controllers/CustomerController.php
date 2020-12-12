@@ -65,6 +65,9 @@ class CustomerController
 
         // send response
         $response->send();
+
+        // close connection
+        $this->trackRepo->closeConnection();
     }
 
     private function createCustomerInvoice(?array $data){

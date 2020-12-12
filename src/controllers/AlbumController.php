@@ -77,6 +77,9 @@ class AlbumController
 
         // send response
         $response->send();
+
+        // close connection
+        $this->trackRepo->closeConnection();
     }
 
     private function getAlbum($id)

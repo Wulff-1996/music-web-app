@@ -33,7 +33,7 @@ class ArtistController
                     $response = $this->getArtist($this->id);
                 } else {
                     $name = isset($_GET['name']) ? $_GET['name'] : null;
-                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 0;
+                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
 
                     if (isset($name)) {
                         // search artists by name
@@ -68,6 +68,9 @@ class ArtistController
 
         // send response
         $response->send();
+
+        // close connection
+        $this->trackRepo->closeConnection();
     }
 
     private function getArtist($id)
@@ -91,7 +94,8 @@ class ArtistController
         return Response::success($artists);
     }
 
-    private function createArtist($data){
+    private function createArtist($data)
+    {
         // validate request
         $rules = [
             'name' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 120]
@@ -100,7 +104,7 @@ class ArtistController
         $validator = new Validator();
         $validator->validate($data, $rules);
 
-        if ($validator->error()){
+        if ($validator->error()) {
             // request is invalid
             return Response::badRequest($validator->error());
         }
@@ -111,10 +115,11 @@ class ArtistController
         // insert new artist
         $artist->id = $this->artistRepo->createArtist($artist);
 
-        return Response::success((array) $artist);
+        return Response::success((array)$artist);
     }
 
-    private function updateArtist($artistId, $data){
+    private function updateArtist($artistId, $data)
+    {
         // validate request
         $rules = [
             'name' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 120]
@@ -123,7 +128,7 @@ class ArtistController
         $validator = new Validator();
         $validator->validate($data, $rules);
 
-        if ($validator->error()){
+        if ($validator->error()) {
             // request is invalid
             return Response::badRequest($validator->error());
         }
@@ -131,17 +136,18 @@ class ArtistController
         $artist = Artist::makeWithId($artistId, $data['name']);
 
         // update artist
-        if (!$this->artistRepo->updateArtist($artist)){
+        if (!$this->artistRepo->updateArtist($artist)) {
             // fails
             return Response::conflictFkFails();
         }
 
         // success return artist
-        return Response::success((array) $artist);
+        return Response::success((array)$artist);
     }
 
-    private function deleteArtist($id){
-        if ($this->artistRepo->delete($id)){
+    private function deleteArtist($id)
+    {
+        if ($this->artistRepo->delete($id)) {
             // delete success
             return Response::okNoContent();
         } else {
@@ -150,8 +156,9 @@ class ArtistController
         }
     }
 
-    private function validatePathId(){
-        if (!$this->id){
+    private function validatePathId()
+    {
+        if (!$this->id) {
             Response::notFoundResponse()->send();
             exit();
         }
