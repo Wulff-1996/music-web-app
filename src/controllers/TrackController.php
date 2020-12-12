@@ -38,22 +38,24 @@ class TrackController // TODO create abstract class for similar properties for a
                     $response = $this->getTrack($this->id);
                 } else {
                     // get all
-                    $search = isset($_GET['search']) ? $_GET['search'] : null;
+                    // TODO change input get
+                    $search = isset($_GET['search']) ? (string) $_GET['search'] : null;
                     $customerId = filter_input(INPUT_GET, 'customer_id', FILTER_VALIDATE_INT);
-                    $artistId = isset($_GET['artist_id']) && is_numeric($_GET['artist_id']) ? (int)$_GET['artist_id'] : null;
-                    $albumId = isset($_GET['album_id']) && is_numeric($_GET['album_id']) ? (int)$_GET['album_id'] : null;
-                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 0;
+                    $artistId = filter_input(INPUT_GET, 'artist_id', FILTER_VALIDATE_INT);
+                    $albumId = filter_input(INPUT_GET, 'album_id', FILTER_VALIDATE_INT);
+                    $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+                    if (!$page) $page = 0;
 
-                    if (isset($search)) {
+                    if ($search) {
                         // search by albums by search eg track name, artis name, album name
                         $response = $this->getTracksBySearch($search, $page);
                     } else if ($customerId) {
                         // search customer tracks
                         $response = $this->getTracksByCustomerId($customerId, $page);
-                    } else if (isset($artistId)) {
+                    } else if ($artistId) {
                         // get all tracks for artist
                         $response = $this->getTracksForArtist($artistId, $page);
-                    } else if (isset($albumId)) {
+                    } else if ($albumId) {
                         // get tracks for album
                         $response = $this->getTracksForAlbum($albumId, $page);
                     } else {
