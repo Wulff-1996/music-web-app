@@ -144,7 +144,9 @@ class AlbumController
         // get inserted album
         $album = $this->albumRepo->find($albumId);
 
-        return Response::created($album);
+        $result = EntityMapper::toJsonAlbum($album);
+
+        return Response::created($result);
     }
 
     private function updateAlbum($id, $data)
@@ -175,7 +177,10 @@ class AlbumController
         }
 
         // success return album
-        return Response::success((array)$album);
+        $result = $this->albumRepo->find($id);
+        $result = EntityMapper::toJsonAlbum($result);
+
+        return Response::success((array) $result);
     }
 
     private function deleteAlbum($id)

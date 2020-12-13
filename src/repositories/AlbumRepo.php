@@ -6,6 +6,7 @@ use PDO;
 use PDOException;
 use Wulff\config\Database;
 use Wulff\entities\Album;
+use Wulff\entities\EntityMapper;
 use Wulff\util\RepoUtil;
 
 class AlbumRepo
@@ -27,7 +28,7 @@ class AlbumRepo
                 SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId
                 FROM album al
                 LEFT JOIN artist ar on al.ArtistId = ar.ArtistId
-                WHERE AlbumId = :id;
+                WHERE al.AlbumId = :id;
 SQL;
 
         $stmt = $this->db->conn->prepare($query);
@@ -61,9 +62,11 @@ SQL;
     public function findAll($page)
     {
         $query = <<<SQL
-            SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId 
+            SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId, COUNT(t.TrackId) AS TrackTotal
             FROM album al
             LEFT JOIN artist ar on al.ArtistId = ar.ArtistId
+            LEFT JOIN track t on al.AlbumId = t.AlbumId
+            GROUP BY al.AlbumId
             LIMIT :offset, :count;
 SQL;
 
@@ -79,15 +82,17 @@ SQL;
         $result['page'] = $page;
         $result['albums'] = $albums;
 
-        return $result;
+        return EntityMapper::toJsonAlbumMultiple($result);
     }
 
     public function findAllByTitle($title, $page){
         $query = <<<SQL
-            SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId 
+            SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId, COUNT(t.TrackId) AS TrackTotal
             FROM album al
             LEFT JOIN artist ar on al.ArtistId = ar.ArtistId
+            LEFT JOIN track t on al.AlbumId = t.AlbumId
             WHERE al.Title LIKE :title
+            GROUP BY al.AlbumId
             LIMIT :offset, :count;
 SQL;
 
@@ -105,15 +110,17 @@ SQL;
         $result['page'] = $page;
         $result['albums'] = $albums;
 
-        return $result;
+        return EntityMapper::toJsonAlbumMultiple($result);
     }
 
     public function findAllByArtistId($artistId, $page){
         $query = <<<SQL
-            SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId 
+            SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId, COUNT(t.TrackId) AS TrackTotal
             FROM album al
             LEFT JOIN artist ar on al.ArtistId = ar.ArtistId
+            LEFT JOIN track t on al.AlbumId = t.AlbumId
             WHERE al.ArtistId = :artistId
+            GROUP BY al.AlbumId
             LIMIT :offset, :count;
 SQL;
 
@@ -130,7 +137,7 @@ SQL;
         $result['page'] = $page;
         $result['albums'] = $albums;
 
-        return $result;
+        return EntityMapper::toJsonAlbumMultiple($result);
     }
 
     public function add(Album $album)
@@ -148,7 +155,6 @@ SQL;
 
         // return created artist id
         return $albumId;
-
     }
 
     public function update(Album $album)
