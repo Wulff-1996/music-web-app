@@ -211,6 +211,7 @@ class AuthController
             return Response::conflictFkFails();
         }
 
+        // TODO make to json naming
         // get inserted track
         $customer->setId($customerId);
 
