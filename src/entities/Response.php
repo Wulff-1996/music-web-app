@@ -50,7 +50,7 @@ class Response
     // client errors
     public static function notFoundResponse(?array $message = null): Response
     {
-        $body = isset($message) ? ['message' => $message] : ['message' => 'Path not found'];
+        $body = isset($message) ? ['message' => $message[0]] : ['message' => 'Path not found'];
         return new Response(
             HttpCode::NOT_FOUND,
             $body);

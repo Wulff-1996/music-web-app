@@ -4,6 +4,7 @@ namespace Wulff\controllers;
 
 use Wulff\config\Database;
 use Wulff\entities\Artist;
+use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\ArtistRepo;
 use Wulff\util\HttpCode;
@@ -78,20 +79,24 @@ class ArtistController
     {
         $artist = $this->artistRepo->find($id);
         if (!$artist) {
-            return Response::notFoundResponse();
+            return Response::notFoundResponse(['no artist with given id']);
         }
+
+        $artist = EntityMapper::toJsonArtist($artist);
         return Response::success($artist);
     }
 
     private function getArtists($page)
     {
         $artists = $this->artistRepo->findAll($page);
+        $artists = EntityMapper::toJsonArtistMultiple($artists);
         return Response::success($artists);
     }
 
     private function getArtistsByName($name, $page)
     {
         $artists = $this->artistRepo->findAllByName($name, $page);
+        $artists = EntityMapper::toJsonArtistMultiple($artists);
         return Response::success($artists);
     }
 

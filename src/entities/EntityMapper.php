@@ -136,4 +136,29 @@ class EntityMapper
         return $result;
     }
 
+    public static function toJsonArtist(array $aritst)
+    {
+        return [
+            'id' => $aritst['ArtistId'],
+            'name' => $aritst['Name'],
+            'album_total' => $aritst['AlbumTotal']
+        ];
+    }
+
+    public static function toJsonArtistMultiple(array $data)
+    {
+        $result = array();
+        $result['page'] = $data['page'];
+        $result['artists'] = array();
+
+        foreach ($data['artists'] as $artist) {
+            array_push($result['artists'], [
+                'id' => $artist['ArtistId'],
+                'name' => $artist['Name'],
+                'album_total' => $artist['AlbumTotal']
+            ]);
+        }
+
+        return $result;
+    }
 }
