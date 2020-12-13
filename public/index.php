@@ -39,6 +39,7 @@ validatePath($urlPaths);
 $resourceId = isset($urlPaths[RESOURCE_INDEX]) ? $urlPaths[RESOURCE_INDEX] : null;
 $request = new Request($urlPaths[CONTROLLER_INDEX], $resourceId, $request_method);
 
+// TODO add authentication on every endpoint except auth controller endpoints
 // map to controller
 switch ($request->controller) {
     case ARTISTS_PATH:

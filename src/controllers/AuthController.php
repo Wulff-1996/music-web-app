@@ -14,6 +14,8 @@ use Wulff\util\SessionHandler;
 use Wulff\util\SessionObject;
 use Wulff\util\Validator;
 
+// TODO return json naming for customer
+// TODO return customer/admin info on login
 class AuthController
 {
     private string $useCase;

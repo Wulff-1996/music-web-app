@@ -12,6 +12,7 @@ use Wulff\util\ConstrollerUtil;
 use Wulff\util\SessionHandler;
 use Wulff\util\Validator;
 
+// TODO add json naming for customer and invoice
 class CustomerController
 {
     private string $useCase;
