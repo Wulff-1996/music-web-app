@@ -17,6 +17,10 @@ class AuthRepo
         $this->db = $db;
     }
 
+    public function closeConnection()
+    {
+        $this->db->close();
+    }
 
     public function getAdminPassword()
     {

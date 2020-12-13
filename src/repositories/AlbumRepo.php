@@ -18,7 +18,8 @@ class AlbumRepo
         $this->db = $db;
     }
 
-    public function closeConnection(){
+    public function closeConnection()
+    {
         $this->db->close();
     }
 
