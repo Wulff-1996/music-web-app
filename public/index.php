@@ -9,9 +9,11 @@ use Wulff\entities\Auth;
 use Wulff\entities\Request;
 use Wulff\entities\Response;
 use Wulff\util\Validator;
+use Wulff\util\SessionHandler;
 
 require '../vendor/autoload.php';
 
+// paths
 const ARTISTS_PATH = 'artists';
 const ALBUMS_PATH = 'albums';
 const TRACKS_PATH = 'tracks';
@@ -27,32 +29,38 @@ const CUSTOMER_LOGIN_PATH = 'customer-login';
 const CUSTOMER_SIGN_UP_PATH = 'customer-signup';
 const LOGOUT_PATH = 'logout';
 
-
+// path indexes
 const CONTROLLER_INDEX = 3; // when changing url, easier to just change index here
 const RESOURCE_INDEX = 4;
 
+// get reqeust info
 $url = $url = strtok($_SERVER['REQUEST_URI'], "?");
 $urlPaths = explode('/', $url);
 $request_method = $_SERVER['REQUEST_METHOD'];
+
+// validate url
 validatePath($urlPaths);
 
+// map paths to controller and resource id
 $resourceId = isset($urlPaths[RESOURCE_INDEX]) ? $urlPaths[RESOURCE_INDEX] : null;
 $request = new Request($urlPaths[CONTROLLER_INDEX], $resourceId, $request_method);
 
-// TODO add authentication on every endpoint except auth controller endpoints
 // map to controller
 switch ($request->controller) {
     case ARTISTS_PATH:
+        authenticateUser();
         $controller = new ArtistController($request->method, $request->resourceId);
         $controller->processRequest();
         break;
 
     case ALBUMS_PATH:
+        authenticateUser();
         $controller = new AlbumController($request->method, $request->resourceId);
         $controller->processRequest();
         break;
 
     case TRACKS_PATH:
+        authenticateUser();
         $controller = new TrackController($request->method, $request->resourceId);
         $controller->processRequest();
         break;
@@ -78,6 +86,14 @@ switch ($request->controller) {
         $response = Response::notFoundResponse();
         $response->send();
         break;
+}
+
+function authenticateUser(){
+    SessionHandler::startSession();
+    if (!SessionHandler::hasSession()){
+        Response::unauthorizedResponse()->send();
+        exit();
+    }
 }
 
 function validatePath($urlPaths)
@@ -115,8 +131,3 @@ function validatePath($urlPaths)
         }
     }
 }
-
-
-
-
-

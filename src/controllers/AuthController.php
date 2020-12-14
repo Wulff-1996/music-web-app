@@ -223,12 +223,12 @@ class AuthController
     private function logout(): Response
     {
         SessionHandler::startSession();
-        $session = SessionHandler::getSession();
-
-        if ($session) {
+        if (SessionHandler::hasSession()){
             SessionHandler::clear();
+            return Response::okNoContent();
+        } else {
+            return Response::unauthorizedResponse(['not logged in']);
         }
-        return Response::okNoContent();
     }
 
 }

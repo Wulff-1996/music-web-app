@@ -41,7 +41,10 @@ class SessionHandler
 
     public static function clear()
     {
-        unset($_SESSION['session_object']);
+        //unset($_SESSION['session_object']);
+        if (self::hasSession()){
+            session_destroy();
+        }
     }
 
     public static function currentUserId(): ?int

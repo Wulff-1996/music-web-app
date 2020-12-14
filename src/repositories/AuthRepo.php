@@ -33,7 +33,7 @@ class AuthRepo
         return $stmt->fetch();
     }
 
-    public function getCustomerLogin(string $email): ?array
+    public function getCustomerLogin(string $email)
     {
         $query = <<<'SQL'
                 SELECT CustomerId, Password FROM customer WHERE Email = :email;
@@ -42,6 +42,7 @@ class AuthRepo
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
+
         return $stmt->fetch();
     }
 
