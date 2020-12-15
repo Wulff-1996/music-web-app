@@ -181,7 +181,7 @@ class AuthController
         // check if email is unique
         if (!$this->authRepo->isEmailUnique($data['email'])){
             // email exists
-            return Response::badRequest(['message' => 'email is not unique']);
+            return Response::badRequest(['email is not unique']);
         }
 
         // email is unique proceed

@@ -76,6 +76,7 @@ switch ($request->controller) {
     case CUSTOMER_LOGIN_PATH:
     case CUSTOMER_SIGN_UP_PATH:
     case LOGOUT_PATH:
+        // public endpoints
         $useCase = $request->controller;
         $controller = new AuthController($useCase, $request->method, $request->resourceId);
         $controller->processRequest();

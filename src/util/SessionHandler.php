@@ -12,12 +12,13 @@ class SessionHandler
 
     public static function startSession(): void
     {
-        session_set_cookie_params(3600 * 3); // valid in 3 hours
         session_start();
     }
 
     public static function setSession(SessionObject $sessionObject)
     {
+        // when setting the session, it will auto send cookie header to client
+        // if no cookie params are set, like expire time, it will expire when browser closes
         $_SESSION['session_object'] = $sessionObject;
     }
 

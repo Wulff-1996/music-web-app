@@ -39,6 +39,20 @@ class Validator
             }
         }
 
+        // remove optional fields that are null
+        foreach ($rules as $key => $value) {
+            // check if field is required
+            if (!in_array(self::REQUIRED, $value, true)){
+                // check if optional field has null value
+                if (array_key_exists($key, $data)) {
+                    if ($data[$key] == null){
+                        // remove element
+                        unset($data[$key]);
+                    }
+                }
+            }
+        }
+
         // update data
         $this->_data = $data;
 

@@ -78,7 +78,6 @@ class TrackController // TODO create abstract class for similar properties for a
 
             case 'DELETE':
                 $this->validatePathId();
-                $this->hasAccess(true);
                 $response = $this->deleteTrack($this->id);
                 break;
 
@@ -241,25 +240,6 @@ class TrackController // TODO create abstract class for similar properties for a
     {
         if (!$this->id) {
             Response::notFoundResponse()->send();
-            exit();
-        }
-    }
-
-    private function hasAccess(string $isAdminRequired)
-    {
-        // TODO add privileges to all endpoints, maybe some general in the index.php file for checking if logged in
-        SessionHandler::startSession();
-        $session = SessionHandler::getSession();
-
-        if (!$session) {
-            // not logged in
-            Response::unauthorizedResponse(['message' => 'Access denied, not logged in'])->send();
-            exit();
-        }
-
-        if ($session->isAdmin() === false && $isAdminRequired) {
-            // admin required
-            Response::unauthorizedResponse(['message' => 'Access denied, needs admin privileges'])->send();
             exit();
         }
     }
