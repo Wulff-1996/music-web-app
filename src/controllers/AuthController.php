@@ -148,7 +148,7 @@ class AuthController
             SessionHandler::startSession();
             SessionHandler::setSession(new SessionObject($data['CustomerId'], false));
             // TODO return logged in customer
-            return Response::okNoContent();
+            return Response::success(['customer_id' => $data['CustomerId']]);
         }
     }
 

@@ -53,8 +53,6 @@ class Validator
             }
         }
 
-        // hello
-
         // update data
         $this->_data = $data;
 

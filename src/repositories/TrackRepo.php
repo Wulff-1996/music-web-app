@@ -24,7 +24,7 @@ class TrackRepo
         $this->db->close();
     }
 
-    public function find($id)
+    public function find($id): ?array
     {
         $query = <<<'SQL'
               SELECT t.TrackId, t.Name AS TrackName, al.AlbumId, al.Title AS AlbumTitle, 
@@ -44,7 +44,11 @@ SQL;
         $stmt->execute();
         $track = $stmt->fetch();
 
-        return EntityMapper::toJsonTrackSingle($track);
+        if (!$track){
+            return null;
+        } else {
+            return EntityMapper::toJsonTrackSingle($track);
+        }
     }
 
     public function findAll($page)

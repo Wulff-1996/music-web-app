@@ -38,7 +38,6 @@ class TrackController // TODO create abstract class for similar properties for a
                     $response = $this->getTrack($this->id);
                 } else {
                     // get all
-                    // TODO change input get
                     $search = isset($_GET['search']) ? (string) $_GET['search'] : null;
                     $customerId = filter_input(INPUT_GET, 'customer_id', FILTER_VALIDATE_INT);
                     $artistId = filter_input(INPUT_GET, 'artist_id', FILTER_VALIDATE_INT);
