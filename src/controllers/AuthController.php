@@ -7,6 +7,7 @@ namespace Wulff\controllers;
 use mysql_xdevapi\Session;
 use Wulff\config\Database;
 use Wulff\entities\Customer;
+use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\AuthRepo;
 use Wulff\util\HttpCode;
@@ -143,12 +144,16 @@ class AuthController
             // password does not match
             return Response::unauthorizedResponse(['message' => 'email and/or password invalid']);
         } else {
-            // validated admin account
+            // account validated
+            // get customer info
+            $customer = $this->authRepo->getCustomer($data['CustomerId']);
+            $customer = EntityMapper::toJsonCustomer($customer);
+
             // begin session
             SessionHandler::startSession();
             SessionHandler::setSession(new SessionObject($data['CustomerId'], false));
-            // TODO return logged in customer
-            return Response::success(['customer_id' => $data['CustomerId']]);
+
+            return Response::success($customer);
         }
     }
 

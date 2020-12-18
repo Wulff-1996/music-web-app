@@ -22,6 +22,18 @@ class AuthRepo
         $this->db->close();
     }
 
+    public function getCustomer(int $id): ?array
+    {
+        $query = <<<'SQL'
+                SELECT * FROM customer WHERE CustomerId = :id;
+            SQL;
+
+        $stmt = $this->db->conn->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
     public function getAdminPassword()
     {
         $query = <<<'SQL'
@@ -56,7 +68,7 @@ class AuthRepo
         $stmt->bindValue(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
 
-        if ($stmt->fetch()){
+        if ($stmt->fetch()) {
             // email exists
             return false;
         } else return true;

@@ -14,7 +14,7 @@ class EntityMapper
             'composer' => $track['Composer'],
             'milliseconds' => $track['Milliseconds'],
             'bytes' => $track['Bytes'],
-            'unit_price' => $track['UnitPrice'],
+            'unit_price' => (float) $track['UnitPrice'],
             'artist' => [
                 'id' => $track['ArtistId'],
                 'name' => $track['ArtistName']
@@ -48,7 +48,7 @@ class EntityMapper
                 'composer' => $track['Composer'],
                 'milliseconds' => $track['Milliseconds'],
                 'bytes' => $track['Bytes'],
-                'unit_price' => $track['UnitPrice'],
+                'unit_price' => (float) $track['UnitPrice'],
                 'artist' => [
                     'id' => $track['ArtistId'],
                     'name' => $track['ArtistName']
@@ -158,6 +158,24 @@ class EntityMapper
                 'album_total' => $artist['AlbumTotal']
             ]);
         }
+
+        return $result;
+    }
+
+    public static function toJsonCustomer(array $data){
+        $result = array();
+        $result['id'] = $data['CustomerId'];
+        $result['first_name'] = $data['FirstName'];
+        $result['last_name'] = $data['LastName'];
+        $result['company'] = $data['Company'];
+        $result['address'] = $data['Address'];
+        $result['city'] = $data['City'];
+        $result['state'] = $data['State'];
+        $result['country'] = $data['Country'];
+        $result['postal_code'] = $data['PostalCode'];
+        $result['phone'] = $data['Phone'];
+        $result['fax'] = $data['Fax'];
+        $result['email'] = $data['Email'];
 
         return $result;
     }
