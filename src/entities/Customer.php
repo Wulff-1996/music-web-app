@@ -8,10 +8,10 @@ class Customer implements JsonSerializable
 {
     // need to have public fields else does sending response with array as body
     public ?string $id;
-    public string $firstName;
-    public string $lastName;
-    public string $email;
-    public string $password;
+    public ?string $firstName;
+    public ?string $lastName;
+    public ?string $email;
+    public ?string $password;
     public ?string $phone;
     public ?string $fax;
     public ?string $company;
@@ -21,7 +21,7 @@ class Customer implements JsonSerializable
     public ?string $postalCode;
     public ?string $country;
 
-    public function __construct(?string $id, string $firstName, string $lastName, string $email, string $password, ?string $phone, ?string $fax, ?string $company, ?string $address, ?string $city, ?string $state, ?string $postalCode, ?string $country)
+    public function __construct(?string $id, ?string $firstName, ?string $lastName, ?string $email, ?string $password, ?string $phone, ?string $fax, ?string $company, ?string $address, ?string $city, ?string $state, ?string $postalCode, ?string $country)
     {
         $this->id = $id;
         $this->firstName = $firstName;
@@ -58,6 +58,14 @@ class Customer implements JsonSerializable
     }
 
     /**
+     * @return string|null
+     */
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
      * @param string|null $id
      */
     public function setId(?string $id): void
@@ -68,71 +76,63 @@ class Customer implements JsonSerializable
     /**
      * @return string|null
      */
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFirstName(): string
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
     /**
-     * @param string $firstName
+     * @param string|null $firstName
      */
-    public function setFirstName(string $firstName): void
+    public function setFirstName(?string $firstName): void
     {
         $this->firstName = $firstName;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
     /**
-     * @param string $lastName
+     * @param string|null $lastName
      */
-    public function setLastName(string $lastName): void
+    public function setLastName(?string $lastName): void
     {
         $this->lastName = $lastName;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
     /**
-     * @param string $email
+     * @param string|null $email
      */
-    public function setEmail(string $email): void
+    public function setEmail(?string $email): void
     {
         $this->email = $email;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
 
     /**
-     * @param string $password
+     * @param string|null $password
      */
-    public function setPassword(string $password): void
+    public function setPassword(?string $password): void
     {
         $this->password = $password;
     }

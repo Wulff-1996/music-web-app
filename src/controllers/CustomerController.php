@@ -3,9 +3,11 @@
 
 namespace Wulff\controllers;
 
+define('LOG_FILE_NAME', 'log.htm');
 
 use Wulff\config\Database;
 use Wulff\entities\Customer;
+use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\CustomerRepo;
 use Wulff\util\ConstrollerUtil;
@@ -30,16 +32,63 @@ class CustomerController
         $this->customerRepo = new CustomerRepo($this->db);
     }
 
+
+    // It debugs the received information to an HTML file
+    function debug($info)
+    {
+
+        $fileName = LOG_FILE_NAME;
+        $path = getcwd();
+
+        // If the invoking php file is in the src directory, the log file is set in the root
+        if (substr($path, strlen($path) - 4, 4) === '\src') {
+            $fileName = '../' . $fileName;
+        }
+
+        $text = '';
+        if (!file_exists($fileName)) {
+            $text .= '<pre>';
+        }
+        $text .= '--- ' . date('Y-m-d h:i:s A', time()) . ' ---<br>';
+
+        $logFile = fopen($fileName, 'a');
+
+        if (gettype($info) === 'array') {
+            $text .= print_r($info, true);
+        } else {
+            $text .= $info . '<br>';
+        }
+        fwrite($logFile, $text);
+
+        fclose($logFile);
+    }
+
     public function processRequest()
     {
         switch ($this->method) {
 
             case 'POST':
+
                 $data = json_decode(file_get_contents('php://input'), true);
-                $response = $this->createCustomerInvoice($data);
+
+                if ($this->id){
+                    $this->debug('update vustomer');
+                    // check if user is owner of account
+                    if (!ConstrollerUtil::validateOwnership($this->id)) {
+                        // user not owner
+                        Response::unauthorizedResponse(['message' => 'cannot modify an account you do not own.'])->send();
+                        exit();
+                    }
+                    // user is owner
+                    $response = $this->updateCustomer($this->id, $data);
+                } else {
+                    $response = $this->createCustomerInvoice($data);
+                }
+
                 break;
 
             case 'PATCH':
+                $this->debug('patch');
                 // check if user is owner of account
                 if (!ConstrollerUtil::validateOwnership($this->id)) {
                     // user not owner
@@ -49,6 +98,7 @@ class CustomerController
 
                 // user is owner
                 $data = json_decode(file_get_contents('php://input'), true);
+
                 $response = $this->updateCustomer($this->id, $data);
                 break;
 
@@ -71,7 +121,8 @@ class CustomerController
         $this->customerRepo->closeConnection();
     }
 
-    private function createCustomerInvoice(?array $data){
+    private function createCustomerInvoice(?array $data)
+    {
         // validate request
         $rules = [
             'customer_id' => [Validator::REQUIRED, Validator::INTEGER],
@@ -86,21 +137,21 @@ class CustomerController
         $validator = new Validator();
         $validator->validate($data, $rules);
 
-        if ($validator->error()){
+        if ($validator->error()) {
             // invalid request
             return Response::badRequest($validator->error());
         }
 
         // check tracks array items if valid
         // check if any tracks
-        if (empty($data['tracks'])){
+        if (empty($data['tracks'])) {
             // no tracks provided
             return Response::badRequest(['no tracks provided']);
         }
 
         $tracks = array();
-        foreach ($data['tracks'] as $key => $value){
-            if (is_array($value)){
+        foreach ($data['tracks'] as $key => $value) {
+            if (is_array($value)) {
                 // validate track
                 $rules = [
                     'id' => [Validator::REQUIRED, Validator::INTEGER]
@@ -108,7 +159,7 @@ class CustomerController
                 $validator = new Validator();
                 $validator->validate($value, $rules);
 
-                if ($validator->error()){
+                if ($validator->error()) {
                     // track invalid formatted
                     return Response::badRequest(['id (track id) required, integer']);
                 } else {
@@ -141,7 +192,7 @@ class CustomerController
         // create invoice
         $invoiceId = $this->customerRepo->createCustomerInvoice($tracks, $invoice);
 
-        if ($invoiceId == -1){
+        if ($invoiceId == -1) {
             // error
             return Response::serverError('Error happend, please try again.');
         } else {
@@ -159,7 +210,7 @@ class CustomerController
             'first_name' => [Validator::TEXT, Validator::MAX_LENGTH => 40],
             'last_name' => [Validator::TEXT, Validator::MAX_LENGTH => 20],
             'email' => [Validator::EMAIL, Validator::MAX_LENGTH => 60],
-            'password' => [Validator::REQUIRED, Validator::TEXT, Validator::MAX_LENGTH => 255],
+            'password' => [Validator::TEXT, Validator::MAX_LENGTH => 255],
             'phone' => [Validator::TEXT, Validator::MAX_LENGTH => 24],
             'fax' => [Validator::TEXT, Validator::MAX_LENGTH => 24],
             'company' => [Validator::TEXT, Validator::MAX_LENGTH => 80],
@@ -178,22 +229,45 @@ class CustomerController
             return Response::badRequest($validator->error());
         }
 
+        $data = $validator->data();
+
         // request valid
         // check if password is updated
         if (isset($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
+        // create db entity
+        $customer = array();
+        isset($data['first_name']) ? $customer['FirstName'] = $data['first_name'] : null;
+        isset($data['last_name']) ? $customer['LastName'] = $data['last_name'] : null;
+        isset($data['email']) ? $customer['Email'] = $data['email'] : null;
+        isset($data['password']) ? $customer['Password'] = $data['password'] : null;
+        isset($data['phone']) ? $customer['Phone'] = $data['phone'] : null;
+        isset($data['fax']) ? $customer['Fax'] = $data['fax'] : null;
+        isset($data['company']) ? $customer['Company'] = $data['company'] : null;
+        isset($data['address']) ? $customer['Address'] = $data['address'] : null;
+        isset($data['city']) ? $customer['City'] = $data['city'] : null;
+        isset($data['state']) ? $customer['State'] = $data['state'] : null;
+        isset($data['postal_code']) ? $customer['PostalCode'] = $data['postal_code'] : null;
+        isset($data['country']) ? $customer['Country'] = $data['country'] : null;
+
+        if (empty($customer)){
+            // all fields provided where set to null, and null values are removed
+            return Response::badRequest(['No fields provided']);
+        }
+
         // update customer
-        $isSuccessful = $this->customerRepo->updateCustomer($id, $data);
+        $isSuccessful = $this->customerRepo->updateCustomer($id, (array)$customer);
 
         if (!$isSuccessful) {
             // failed due to FK constraint
             return Response::conflictFkFails();
         } else {
             // update success, send back updated resource
-            $updatedCustomer = $this->customerRepo->find($id);
-            return Response::success($updatedCustomer);
+            $customer = $this->customerRepo->find($id);
+            $customer = EntityMapper::toJsonCustomer($customer);
+            return Response::success($customer);
         }
     }
 

@@ -6,9 +6,10 @@ class RepoUtil
 {
     const COUNT = 10;
 
-    public static function getOffset($page)
+    public static function getOffset(int $page, ?int $count = null)
     {
-        return self::COUNT * $page;
+        $count = ($count != null) ? $count : self::COUNT;
+        return $count * $page;
     }
 
 }

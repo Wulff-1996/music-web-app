@@ -10,6 +10,7 @@ use Wulff\entities\Request;
 use Wulff\entities\Response;
 use Wulff\util\Validator;
 use Wulff\util\SessionHandler;
+use Wulff\controllers\SearchController;
 
 require '../vendor/autoload.php';
 
@@ -18,6 +19,10 @@ const ARTISTS_PATH = 'artists';
 const ALBUMS_PATH = 'albums';
 const TRACKS_PATH = 'tracks';
 const AUTH_PATH = 'auth';
+
+// search paths
+const SEARCH_GENRES_PATH = 'search-genres';
+const SEARCH_MEDIA_PATH = 'search-media';
 
 // customer paths
 const CUSTOMERS_PATH = 'customers';
@@ -67,8 +72,17 @@ switch ($request->controller) {
 
     case CUSTOMERS_PATH:
     case CUSTOMER_INVOICES_PATH:
+        authenticateUser();
         $useCase = $request->controller;
         $controller = new CustomerController($useCase, $request->method, $request->resourceId);
+        $controller->processRequest();
+        break;
+
+    case SEARCH_GENRES_PATH:
+    case SEARCH_MEDIA_PATH:
+        authenticateUser();
+        $useCase = $request->controller;
+        $controller = new SearchController($useCase, $request->method, $request->resourceId);
         $controller->processRequest();
         break;
 
@@ -126,7 +140,6 @@ function validatePath($urlPaths)
         // check if path id is valid
         if ($validator->error()) {
             $response = Response::badRequest($validator->error());
-            // $response = Response::notFoundResponse();
             $response->send();
             exit();
         }

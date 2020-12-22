@@ -60,7 +60,7 @@ SQL;
         return $track;
     }
 
-    public function findAll($page)
+    public function findAll($page, $count)
     {
         $query = <<<SQL
             SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId, COUNT(t.TrackId) AS TrackTotal
@@ -71,11 +71,11 @@ SQL;
             LIMIT :offset, :count;
 SQL;
 
-        $offset = RepoUtil::getOffset($page);
+        $offset = RepoUtil::getOffset($page, $count);
 
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
+        $stmt->bindValue(':count', $count, PDO::PARAM_INT);
         $stmt->execute();
         $albums = $stmt->fetchAll();
 
@@ -86,7 +86,7 @@ SQL;
         return EntityMapper::toJsonAlbumMultiple($result);
     }
 
-    public function findAllByTitle($title, $page){
+    public function findAllByTitle($title, $page, $count){
         $query = <<<SQL
             SELECT al.AlbumId, al.Title, ar.Name, al.ArtistId, COUNT(t.TrackId) AS TrackTotal
             FROM album al
@@ -97,13 +97,13 @@ SQL;
             LIMIT :offset, :count;
 SQL;
 
-        $offset = RepoUtil::getOffset($page);
+        $offset = RepoUtil::getOffset($page, $count);
         $title = '%' . $title . '%';
 
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':title', $title, PDO::PARAM_STR);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
+        $stmt->bindValue(':count', $count, PDO::PARAM_INT);
         $stmt->execute();
         $albums = $stmt->fetchAll();
 

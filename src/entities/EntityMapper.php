@@ -179,4 +179,34 @@ class EntityMapper
 
         return $result;
     }
+
+    public static function toJsonGenres(array $genres){
+        $result = array();
+        $result['page'] = $genres['page'];
+        $result['genres'] = array();
+
+        foreach ($genres['genres'] as $genre){
+            array_push($result['genres'], [
+                'id' => $genre['GenreId'],
+                'name' => $genre['Name'],
+            ]);
+        }
+
+        return $result;
+    }
+
+    public static function toJsonMedia(array $mediaList){
+        $result = array();
+        $result['page'] = $mediaList['page'];
+        $result['media'] = array();
+
+        foreach ($mediaList['media'] as $media){
+            array_push($result['media'], [
+                'id' => $media['MediaTypeId'],
+                'name' => $media['Name'],
+            ]);
+        }
+
+        return $result;
+    }
 }

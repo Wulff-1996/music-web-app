@@ -8,6 +8,7 @@ use Wulff\entities\Auth;
 use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\AlbumRepo;
+use Wulff\util\RepoUtil;
 use Wulff\util\SessionObject;
 use Wulff\util\Validator;
 
@@ -39,18 +40,21 @@ class AlbumController
                     // get all albums
                     $title = isset($_GET['title']) ? $_GET['title'] : null;
                     $artistId = filter_input(INPUT_GET, 'artist_id', FILTER_VALIDATE_INT);
+                    $count = filter_input(INPUT_GET, 'count', FILTER_VALIDATE_INT);
                     $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+
                     if (!$page) $page = 0;
+                    if (!$count) $count = RepoUtil::COUNT;
 
                     if ($title) {
                         // get all albums match title
-                        $response = $this->getAlbumsByTitle($title, $page);
+                        $response = $this->getAlbumsByTitle($title, $page, $count);
                     } else if ($artistId) {
                         // get all albums for artist
                         $response = $this->getAlbumsForArtist($artistId, $page);
                     } else {
                         // get all albums
-                        $response = $this->getAlbums($page);
+                        $response = $this->getAlbums($page, $count);
                     }
                 }
                 break;
@@ -101,9 +105,9 @@ class AlbumController
         return Response::success($result);
     }
 
-    private function getAlbums($page)
+    private function getAlbums($page, $count)
     {
-        $albums = $this->albumRepo->findAll($page);
+        $albums = $this->albumRepo->findAll($page, $count);
         return Response::success($albums);
     }
 
@@ -113,9 +117,9 @@ class AlbumController
         return Response::success($albums);
     }
 
-    private function getAlbumsByTitle($title, $page)
+    private function getAlbumsByTitle($title, $page, $count)
     {
-        $albums = $this->albumRepo->findAllByTitle($title, $page);
+        $albums = $this->albumRepo->findAllByTitle($title, $page, $count);
         return Response::success($albums);
     }
 
