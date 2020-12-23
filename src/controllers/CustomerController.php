@@ -3,18 +3,16 @@
 
 namespace Wulff\controllers;
 
-define('LOG_FILE_NAME', 'log.htm');
 
 use Wulff\config\Database;
 use Wulff\entities\Customer;
 use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\CustomerRepo;
-use Wulff\util\ConstrollerUtil;
+use Wulff\util\ControllerUtil;
 use Wulff\util\SessionHandler;
 use Wulff\util\Validator;
 
-// TODO add json naming for customer and invoice
 class CustomerController
 {
     private string $useCase;
@@ -32,37 +30,6 @@ class CustomerController
         $this->customerRepo = new CustomerRepo($this->db);
     }
 
-
-    // It debugs the received information to an HTML file
-    function debug($info)
-    {
-
-        $fileName = LOG_FILE_NAME;
-        $path = getcwd();
-
-        // If the invoking php file is in the src directory, the log file is set in the root
-        if (substr($path, strlen($path) - 4, 4) === '\src') {
-            $fileName = '../' . $fileName;
-        }
-
-        $text = '';
-        if (!file_exists($fileName)) {
-            $text .= '<pre>';
-        }
-        $text .= '--- ' . date('Y-m-d h:i:s A', time()) . ' ---<br>';
-
-        $logFile = fopen($fileName, 'a');
-
-        if (gettype($info) === 'array') {
-            $text .= print_r($info, true);
-        } else {
-            $text .= $info . '<br>';
-        }
-        fwrite($logFile, $text);
-
-        fclose($logFile);
-    }
-
     public function processRequest()
     {
         switch ($this->method) {
@@ -72,9 +39,8 @@ class CustomerController
                 $data = json_decode(file_get_contents('php://input'), true);
 
                 if ($this->id){
-                    $this->debug('update vustomer');
                     // check if user is owner of account
-                    if (!ConstrollerUtil::validateOwnership($this->id)) {
+                    if (!ControllerUtil::validateOwnership($this->id)) {
                         // user not owner
                         Response::unauthorizedResponse(['message' => 'cannot modify an account you do not own.'])->send();
                         exit();
@@ -90,7 +56,7 @@ class CustomerController
             case 'PATCH':
                 $this->debug('patch');
                 // check if user is owner of account
-                if (!ConstrollerUtil::validateOwnership($this->id)) {
+                if (!ControllerUtil::validateOwnership($this->id)) {
                     // user not owner
                     Response::unauthorizedResponse(['message' => 'cannot modify an account you do not own.'])->send();
                     exit();
@@ -98,13 +64,12 @@ class CustomerController
 
                 // user is owner
                 $data = json_decode(file_get_contents('php://input'), true);
-
                 $response = $this->updateCustomer($this->id, $data);
                 break;
 
             case 'DELETE':
                 // check if user is owner of account
-                if (!ConstrollerUtil::validateOwnership($this->id)) {
+                if (!ControllerUtil::validateOwnership($this->id)) {
                     // user not owner
                     Response::unauthorizedResponse(['message' => 'cannot modify an account you do not own.'])->send();
                     exit();

@@ -7,6 +7,7 @@ use Wulff\config\Database;
 use Wulff\entities\Response;
 use Wulff\entities\Track;
 use Wulff\repositories\TrackRepo;
+use Wulff\util\ControllerUtil;
 use Wulff\util\SessionHandler;
 use Wulff\util\Validator;
 
@@ -66,17 +67,24 @@ class TrackController // TODO create abstract class for similar properties for a
 
             case 'POST':
                 $data = json_decode(file_get_contents('php://input'), true);
-                $response = $this->createTrack($data);
+
+                if ($this->id){
+                    // update customer
+                    $response = $this->update($this->id, $data);
+                } else {
+                    $response = $this->createTrack($data);
+
+                }
                 break;
 
             case 'PATCH':
-                $this->validatePathId();
+                ControllerUtil::validatePathId($this->id);
                 $data = json_decode(file_get_contents('php://input'), true);
                 $response = $this->update($this->id, $data);
                 break;
 
             case 'DELETE':
-                $this->validatePathId();
+                ControllerUtil::validatePathId($this->id);
                 $response = $this->deleteTrack($this->id);
                 break;
 
@@ -232,14 +240,6 @@ class TrackController // TODO create abstract class for similar properties for a
         } else {
             // error, integrity violation
             return Response::conflictFkFails();
-        }
-    }
-
-    private function validatePathId()
-    {
-        if (!$this->id) {
-            Response::notFoundResponse()->send();
-            exit();
         }
     }
 }

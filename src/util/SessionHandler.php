@@ -50,7 +50,7 @@ class SessionHandler
 
     public static function currentUserId(): ?int
     {
-        SessionHandler::startSession();
+        //SessionHandler::startSession();
         if (!SessionHandler::hasSession()) {
             return null;
         }

@@ -47,7 +47,8 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 validatePath($urlPaths);
 
 // map paths to controller and resource id
-$resourceId = isset($urlPaths[RESOURCE_INDEX]) ? $urlPaths[RESOURCE_INDEX] : null;
+$resourceId = (isset($urlPaths[RESOURCE_INDEX])) ? $urlPaths[RESOURCE_INDEX] : null;
+$resourceId = validateResourceId($resourceId);
 $request = new Request($urlPaths[CONTROLLER_INDEX], $resourceId, $request_method);
 
 // map to controller
@@ -103,9 +104,10 @@ switch ($request->controller) {
         break;
 }
 
-function authenticateUser(){
+function authenticateUser()
+{
     SessionHandler::startSession();
-    if (!SessionHandler::hasSession()){
+    if (!SessionHandler::hasSession()) {
         Response::unauthorizedResponse()->send();
         exit();
     }
@@ -144,4 +146,24 @@ function validatePath($urlPaths)
             exit();
         }
     }
+}
+
+function validateResourceId($resourceId)
+{
+    \Wulff\util\ControllerUtil::debug($resourceId);
+
+    if (!isset($resourceId)){
+        return null;
+    }
+
+    if (!is_numeric($resourceId)){
+        // id invalid
+        Response::notFoundResponse(['path not found, id was not an integer'])->send();
+        exit();
+    }
+
+    \Wulff\util\ControllerUtil::debug((int) $resourceId);
+
+
+    return (int) $resourceId;
 }
