@@ -39,7 +39,7 @@ SQL;
         return $artist;
     }
 
-    function findAll($page)
+    function findAll($page, $count = null)
     {
         $query = <<<'SQL'
             SELECT a.ArtistId, a.Name, COUNT(al.AlbumId) AS AlbumTotal
@@ -49,11 +49,12 @@ SQL;
             LIMIT :offset, :count;
 SQL;
 
-        $offset = RepoUtil::getOffset($page);
+        $count = ($count) ? $count : RepoUtil::COUNT;
+        $offset = RepoUtil::getOffset($page, $count);
 
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
+        $stmt->bindValue(':count', $count, PDO::PARAM_INT);
         $stmt->execute();
         $artists = $stmt->fetchAll();
 
@@ -64,7 +65,7 @@ SQL;
         return $result;
     }
 
-    function findAllByName($name, $page = 0)
+    function findAllByName($name, $page = 0, $count = null)
     {
         $query = <<<'SQL'
             SELECT a.ArtistId, a.Name, COUNT(al.AlbumId) AS AlbumTotal
@@ -75,13 +76,14 @@ SQL;
             LIMIT :offset, :count;
 SQL;
 
-        $offset = RepoUtil::getOffset($page);
+        $count = ($count) ? $count : RepoUtil::COUNT;
+        $offset = RepoUtil::getOffset($page, $count);
         $name = '%' . $name . '%';
 
         $stmt = $this->db->conn->prepare($query);
         $stmt->bindValue(':name', $name, PDO::PARAM_STR);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->bindValue(':count', RepoUtil::COUNT, PDO::PARAM_INT);
+        $stmt->bindValue(':count', $count, PDO::PARAM_INT);
 
         $stmt->execute();
         $artists = $stmt->fetchAll();

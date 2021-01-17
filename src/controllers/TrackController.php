@@ -73,7 +73,6 @@ class TrackController // TODO create abstract class for similar properties for a
                     $response = $this->update($this->id, $data);
                 } else {
                     $response = $this->createTrack($data);
-
                 }
                 break;
 

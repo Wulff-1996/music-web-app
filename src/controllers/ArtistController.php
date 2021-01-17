@@ -8,6 +8,7 @@ use Wulff\entities\EntityMapper;
 use Wulff\entities\Response;
 use Wulff\repositories\ArtistRepo;
 use Wulff\util\HttpCode;
+use Wulff\util\RepoUtil;
 use Wulff\util\Validator;
 
 class ArtistController
@@ -35,14 +36,17 @@ class ArtistController
                 } else {
                     $name = isset($_GET['name']) ? (string)$_GET['name'] : null;
                     $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+                    $count = filter_input(INPUT_GET, 'count', FILTER_VALIDATE_INT);
+
                     if (!$page) $page = 0;
+                    if (!$count) $count = RepoUtil::COUNT;
 
                     if ($name) {
                         // search artists by name
-                        $response = $this->getArtistsByName($name, $page);
+                        $response = $this->getArtistsByName($name, $page, $count);
                     } else {
                         // get all artists
-                        $response = $this->getArtists($page);
+                        $response = $this->getArtists($page, $count);
                     }
                 }
                 break;
@@ -86,16 +90,16 @@ class ArtistController
         return Response::success($artist);
     }
 
-    private function getArtists($page)
+    private function getArtists($page, $count)
     {
-        $artists = $this->artistRepo->findAll($page);
+        $artists = $this->artistRepo->findAll($page, $count);
         $artists = EntityMapper::toJsonArtistMultiple($artists);
         return Response::success($artists);
     }
 
-    private function getArtistsByName($name, $page)
+    private function getArtistsByName(string $name, int $page, int $count)
     {
-        $artists = $this->artistRepo->findAllByName($name, $page);
+        $artists = $this->artistRepo->findAllByName($name, $page, $count);
         $artists = EntityMapper::toJsonArtistMultiple($artists);
         return Response::success($artists);
     }
