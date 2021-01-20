@@ -123,7 +123,11 @@ class ArtistController
         $artist = Artist::make($data['name']);
 
         // insert new artist
-        $artist->id = $this->artistRepo->createArtist($artist);
+        $artistId = $this->artistRepo->createArtist($artist);
+
+        // find inserted artist
+        $artist = $this->artistRepo->find($artistId);
+        $artist = EntityMapper::toJsonArtist((array) $artist);
 
         return Response::success((array)$artist);
     }
@@ -152,6 +156,9 @@ class ArtistController
         }
 
         // success return artist
+        $artist = $this->artistRepo->find($artistId);
+        $artist = EntityMapper::toJsonArtist((array) $artist);
+
         return Response::success((array)$artist);
     }
 

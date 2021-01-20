@@ -180,6 +180,24 @@ class EntityMapper
         return $result;
     }
 
+    public static function toJsonCustomerFromObject(Customer $customer){
+        $result = array();
+        $result['id'] = $customer->getId();
+        $result['first_name'] = $customer->getFirstName();
+        $result['last_name'] = $customer->getLastName();
+        $result['company'] = $customer->getCompany();
+        $result['address'] = $customer->getAddress();
+        $result['city'] = $customer->getCity();
+        $result['state'] = $customer->getState();
+        $result['country'] = $customer->getCountry();
+        $result['postal_code'] = $customer->getPostalCode();
+        $result['phone'] = $customer->getPhone();
+        $result['fax'] = $customer->getFax();
+        $result['email'] = $customer->getEmail();
+
+        return $result;
+    }
+
     public static function toJsonGenres(array $genres){
         $result = array();
         $result['page'] = $genres['page'];
@@ -204,6 +222,35 @@ class EntityMapper
             array_push($result['media'], [
                 'id' => $media['MediaTypeId'],
                 'name' => $media['Name'],
+            ]);
+        }
+
+        return $result;
+    }
+
+    public static function toJsonInvoice(array $invoice){
+        $result = array();
+        $result['invoice_id'] = $invoice['InvoiceId'];
+        $result['customer_id'] = $invoice['CustomerId'];
+        $result['invoice_date'] = $invoice['InvoiceDate'];
+        $result['address'] = $invoice['BillingAddress'];
+        $result['city'] = $invoice['BillingCity'];
+        $result['state'] = $invoice['BillingState'];
+        $result['country'] = $invoice['BillingCountry'];
+        $result['postal_code'] = $invoice['BillingPostalCode'];
+        $result['total'] = $invoice['Total'];
+        $result['postal_code'] = $invoice['BillingPostalCode'];
+        $result['postal_code'] = $invoice['BillingPostalCode'];
+        $result['postal_code'] = $invoice['BillingPostalCode'];
+        $result['invoice_lines'] = array();
+
+        foreach ($invoice['invoicelines'] as $item){
+            array_push($result['invoice_lines'], [
+                'invoice_line_id' => $item['InvoiceLineId'],
+                'invoice_id' => $item['InvoiceId'],
+                'track_id' => $item['TrackId'],
+                'unit_price' => $item['UnitPrice'],
+                'quantity' => $item['Quantity'],
             ]);
         }
 

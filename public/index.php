@@ -36,20 +36,20 @@ const LOGOUT_PATH = 'logout';
 
 // path indexes
 const CONTROLLER_INDEX = 3; // when changing url, easier to just change index here
-const RESOURCE_INDEX = 4;
+const RESOURCE_INDEX = 4; // TODO remove these two
+
+const CONTROLLER_INDEX_OFFSET = 2;
+const RESOURCE_INDEX_OFFSET = 3;
+
+$controller = null;
+$resourceId = null;
 
 // get reqeust info
 $url = $url = strtok($_SERVER['REQUEST_URI'], "?");
 $urlPaths = explode('/', $url);
-$request_method = $_SERVER['REQUEST_METHOD'];
+$requestMethod = $_SERVER['REQUEST_METHOD'];
 
-// validate url
-validatePath($urlPaths);
-
-// map paths to controller and resource id
-$resourceId = (isset($urlPaths[RESOURCE_INDEX])) ? $urlPaths[RESOURCE_INDEX] : null;
-$resourceId = validateResourceId($resourceId);
-$request = new Request($urlPaths[CONTROLLER_INDEX], $resourceId, $request_method);
+$request = validatePath2($urlPaths, $controller, $resourceId, $requestMethod);
 
 // map to controller
 switch ($request->controller) {
@@ -113,6 +113,57 @@ function authenticateUser()
     }
 }
 
+function validatePath2($urlPaths, $controller, $resourceId, $requestMethod){
+    $controllerIndex = null;
+    $resourceIdIndex = null;
+
+    // find indexes from path
+    foreach($urlPaths as $key => $value) {
+        if ($value === 'music-web-app-api'){
+            $controllerIndex = $key + CONTROLLER_INDEX_OFFSET;
+            $resourceIdIndex = $key + RESOURCE_INDEX_OFFSET;
+            break;
+        }
+    }
+
+    // parse values to paths
+    $controller = (isset($urlPaths[$controllerIndex])) ? $urlPaths[$controllerIndex] : null;
+    $resourceId = (isset($urlPaths[$resourceIdIndex])) ? $urlPaths[$resourceIdIndex] : null;
+
+    // check if path is correct length
+    if (isset($urlPaths[$resourceIdIndex + 1])) {
+        // path not known, too long
+        $response = Response::notFoundResponse();
+        $response->send();
+        exit();
+    }
+
+    // check if controller is present
+    if (!$controller) {
+        $response = Response::notFoundResponse();
+        $response->send();
+        exit();
+    }
+
+    // validate resource id if present
+    if (isset($resourceId) && !empty($resourceId)) {
+        // parse to int
+        if (filter_var($resourceId, FILTER_VALIDATE_INT)){
+            $resourceId = (int) $resourceId;
+        } else {
+            // not valid int
+            $response = Response::badRequest(['message' => 'id must be a valid int above 0']);
+            $response->send();
+            exit();
+        }
+    } else {
+        // if empty make it null to support ending / in url like: api/customers/
+        $resourceId = null;
+    }
+
+    return new Request($controller, $resourceId, $requestMethod);
+}
+
 function validatePath($urlPaths)
 {
     // check if path is correct length
@@ -150,8 +201,6 @@ function validatePath($urlPaths)
 
 function validateResourceId($resourceId)
 {
-    \Wulff\util\ControllerUtil::debug($resourceId);
-
     if (!isset($resourceId)){
         return null;
     }
@@ -161,8 +210,6 @@ function validateResourceId($resourceId)
         Response::notFoundResponse(['path not found, id was not an integer'])->send();
         exit();
     }
-
-    \Wulff\util\ControllerUtil::debug((int) $resourceId);
 
 
     return (int) $resourceId;

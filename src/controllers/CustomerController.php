@@ -164,6 +164,7 @@ class CustomerController
             // success, return created invoice
             $invoice = $this->customerRepo->findInvoice($invoiceId);
             $invoice['invoicelines'] = $this->customerRepo->findInvoicelinesByInvoiceId($invoiceId);
+            $invoice = EntityMapper::toJsonInvoice((array) $invoice);
             return Response::success($invoice);
         }
     }

@@ -1,0 +1,10 @@
+bugs:
+
+BACKEND
+	validator
+	-fields not marked required gets ignored if null
+	---fix: change to accept all fields received, to update a field to null
+
+
+FRONTEND
+	do not send send all fields when updating, only fields that needs to be updated

@@ -56,7 +56,6 @@ class AuthController
                         break;
 
                     case LOGOUT_PATH:
-                        $data = json_decode(file_get_contents('php://input'), true);
                         $response = $this->logout();
                         break;
                 }
@@ -184,7 +183,7 @@ class AuthController
         }
 
         // check if email is unique
-        if (!$this->authRepo->isEmailUnique($data['email'])){
+        if (!$this->authRepo->isEmailUnique($data['email'])) {
             // email exists
             return Response::badRequest(['email is not unique']);
         }
@@ -210,25 +209,22 @@ class AuthController
         );
 
         try {
-            // add track
-            $customerId = $this->authRepo->createCustomer($customer);
-
+            // create customer
+            $customer->setId($this->authRepo->createCustomer($customer));
         } catch (PDOException $e) {
             // integrity error
             return Response::conflictFkFails();
         }
 
-        // TODO make to json naming
-        // get inserted track
-        $customer->setId($customerId);
+        $customer = EntityMapper::toJsonCustomerFromObject($customer);
 
-        return Response::success((array) $customer);
+        return Response::success((array)$customer);
     }
 
     private function logout(): Response
     {
         SessionHandler::startSession();
-        if (SessionHandler::hasSession()){
+        if (SessionHandler::hasSession()) {
             SessionHandler::clear();
         }
 
